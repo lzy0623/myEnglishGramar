@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>社区讨论-评论页面</title>
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/e_community.css">
+  <link rel="stylesheet" href="css/e_comment.css">
+
+<body>
+  <div class="main-container" id="main-container-comment">
+    <div class="content-wrapper">
+
+      <div id="discussion-box">
+        <!-- 讨论卡片 -->
+      </div>
+
+      <!-- 评论区域 -->
+      <div class="comment-box" id="comment-box">
+      </div>
+
+      <div class="comment-input">
+        <img class="userAvatarimg"></img>
+        <input type="text" id="comment-content" placeholder="请输入评论内容" required>
+        <button onclick="submitComment()">发送</button>
+      </div>
+
+    </div>
+  </div>
+  <script src="js/e_community.js"></script>
+  <script src="js/e_comment.js"></script>
+</body>
+
+</html>

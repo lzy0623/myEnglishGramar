@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>语法在线 - 短文阅读</title>
+  <link rel="stylesheet" href="css/navigation.css">
+  <link rel="stylesheet" href="css/d_essay.css">
+  <script src="js/navigation.js"></script>
+</head>
+
+<body>
+  <header>
+  </header>
+
+  <div class="main-container">
+    <div class="content-wrapper">
+      <div class="article-box" id="article-container">
+      </div>
+      <!-- <div class="article-header">
+          <div class="time">
+            <p>22-02-2025</p>
+          </div>
+          <h1>The Best and the Worst</h1>
+        </div>
+        <div class="article-content">
+          <div class="english">
+            <p>One summer afternoon Tom found himself in tfdsfdsafdsafadsfdfddsdfdffddf</p>
+          </div>
+          <div class="translate">
+            <p>一个夏日的下午，汤姆发现自己在前院里无事可做</p>
+          </div>
+        </div> -->
+
+
+      <div class="controls">
+        <div class="controls-content">
+          <div id="upload-article-box">
+          </div>
+          <div class="play-icons">
+            <span class="icon-play"><img src="images/icon/playnext.png"> </span>
+            <span class="icon-play"><img src="images/icon/play_music.png"> </span>
+            <span class="icon-play right"><img src="images/icon/playnext.png"> </span>
+          </div>
+
+          <div class="playmore">
+            <span onclick="toggleTranslate()">
+              <img src="images/icon/translate.png">
+              翻译
+            </span>
+            <span>
+              <select class="level-select" onchange="selectLevel(this.value)">
+                <option value="初级">初级</option>
+                <option value="中级">中级</option>
+                <option value="高级">高级</option>
+              </select>
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="js/d_essay.js"></script>
+</body>
+
+</html>

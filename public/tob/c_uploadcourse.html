@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>B端-上传主课程</title>
+  <link rel="stylesheet" href="tob_navigation.css">
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="content-wrapper">
+      <div class="box">
+        <form onsubmit="submitCourse(event)">
+          <div class="form-group">
+            <label for="courseName">主课程名称</label>
+            <input type="text" id="courseName" placeholder="输入主课程名称" required>
+          </div>
+          <div class="form-group">
+            <label for="description">主课程描述</label>
+            <input type="text" id="description" placeholder="输入主课程描述" required>
+          </div>
+          <div class="form-group">
+            <label for="video">主课程视频</label>
+            <input type="file" id="video" accept="video/*" required>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="cancel-btn">取消上传</button>
+            <button type="submit" class="submit-btn">上传</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // 表单提交处理
+    async function submitCourse(event) {
+      event.preventDefault();
+      // 表单验证
+      const courseName = document.getElementById('courseName').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const videoFile = document.getElementById('video').files[0];
+      if (!courseName || !description || !videoFile) {
+        alert('请填写所有必填项');
+        return;
+      }
+      //得到用户id方便确定用户是不是管理员
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      const userId = currentUser.id;
+      const userName = currentUser.username;
+      console.log('用户id', userId, typeof userId);
+      // 构建表单数据
+      const formData = new FormData();
+      formData.append('title', courseName);
+      formData.append('description', description);
+      formData.append('video', videoFile);
+      formData.append('userId', userId);
+      formData.append('userName', userName);
+      try {
+        const response = await fetch('http://localhost:3000/api/upload/course', {
+          method: 'POST',
+          body: formData
+          // headers会自动设置multipart/form-data
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(`上传成功!主课程ID: ${result.id}`);
+          //document.querySelector('form').reset();
+        } else {
+          throw new Error(result.error || '上传失败');
+        }
+      } catch (err) {
+        console.error('上传错误:', err);
+        alert(`上传失败: ${err.message}`);
+      }
+    }
+
+    // 取消按钮处理
+    document.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.querySelector('form').reset();
+      window.close();
+    });
+  </script>
+</body>
+
+</html>

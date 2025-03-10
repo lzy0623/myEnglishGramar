@@ -1,0 +1,89 @@
+body {
+  padding: 0;
+}
+
+/* 语法部分样式 */
+.grammar-section {
+  margin: 0 auto;
+  padding: 16px 24px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  width: 950px;
+  transition: width 0.3s ease, height 0.3s ease, transform 0.3s ease;
+}
+
+.grammar-section:hover {
+  box-shadow: 0 20px 20px -20px rgba(0, 0, 0, 0.2);
+  transform: scale(1.01);
+  transform-origin: center;
+}
+
+/* 每个知识点标题 */
+.section-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 20px;
+  font-weight: 550;
+  letter-spacing: 2px;
+  line-height: 40px;
+  color: rgba(56, 56, 56, 1);
+  text-align: left;
+  vertical-align: top;
+}
+
+/*标题前蓝色小方块*/
+.section-marker {
+  width: 6px;
+  height: 16px;
+  background: rgba(42, 130, 228, 1);
+  margin-right: 8px;
+  border-radius: 2px;
+}
+
+/* 每个知识点例句 */
+.section-examle {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: 1.6;
+  color: rgba(121, 72, 234, 1);
+  text-align: left;
+  vertical-align: top;
+  margin-bottom: 14px;
+  margin-top: 8px;
+}
+
+/* 每个知识点内容 */
+.section-content {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: 1.6;
+  color: #666;
+  text-align: left;
+  vertical-align: top;
+  margin-bottom: 8px;
+}
+
+/* 每个知识点里面的字内容标题 */
+.feature-title {
+  margin: 16px 0px 6px 0px;
+
+  color: #333;
+}
+
+.feature-list {
+  list-style: none;
+}
+
+.feature-list li {
+  margin-bottom: 4px;
+  color: rgba(128, 128, 128, 1);
+}
+
+.summary {
+  margin-top: 16px;
+  color: rgba(128, 128, 128, 1);
+}

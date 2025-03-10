@@ -1,0 +1,171 @@
+.article-box {
+  max-width: 940px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.1),
+    0px -1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 160px;
+}
+
+.article-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.article-header .time {
+  text-align: left;
+  margin-left: 10px;
+}
+
+.article-header h1 {
+  font-size: 30px;
+  color: rgba(56, 56, 56, 1);
+}
+
+.article-header p {
+  color: rgba(56, 56, 56, 1);
+  font-size: 16px;
+}
+
+.article-content {
+  padding: 10px 10px;
+}
+
+.article-content .english,
+.article-content .translate {
+  font-size: 20px;
+  font-weight: 450;
+  letter-spacing: 1px;
+  line-height: 28px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.article-content .english {
+  margin-bottom: 20px;
+  color: rgba(56, 56, 56, 1);
+}
+
+.article-content .translate {
+  margin-bottom: 40px;
+  color: rgba(128, 128, 128, 1);
+}
+
+.controls {
+  margin-top: 20px auto;
+  max-width: 900px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1),
+    0px -2px 4px rgba(42, 130, 228, 0.2);
+  margin: 0px auto;
+  background: rgb(255, 255, 255);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.controls .controls-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 800px;
+  padding: 20px;
+  color: #666;
+  font-size: 14px;
+  margin: 0px auto;
+}
+
+.controls .play-icons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 200px;
+  height: 50px;
+}
+
+.icon-play {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-self: center;
+  cursor: pointer;
+}
+
+.icon-play:hover {
+  border-radius: 8px;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.controls .right img {
+  transform: rotate(180deg);
+  /* 旋转 90 度 */
+}
+
+.controls .playmore {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 200px;
+  height: 50px;
+}
+
+.controls .playmore span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.controls select {
+  /* 去掉默认的下拉箭头 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* 去掉边框 */
+  border: none;
+  /* 去掉背景 */
+  background: none;
+  /* 设置鼠标样式 */
+  cursor: pointer;
+  padding: 2px 21px;
+  background: url('../images/icon/all.png') no-repeat left center;
+  /* 设置背景图片大小 */
+  background-size: 16px 16px;
+  filter: brightness(0);
+  background-position: left 0px center;
+  /* 将背景图片向右移动10px */
+  margin-right: -20px;
+}
+
+.controls select:focus {
+  outline: none;
+  border-color: rgba(42, 130, 228, 1);
+}
+
+.controls .playmore img {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  filter: brightness(0);
+  /* 解释：
+     - brightness(0): 将图片亮度设置为0，使图片变为纯色。
+     - saturate(100%): 保持饱和度不变。
+     - invert(49%): 反转颜色的亮度，接近目标颜色。
+     - sepia(99%): 应用棕褐色滤镜。
+     - saturate(151%): 增加饱和度。
+     - hue-rotate(188deg): 旋转色相，接近目标颜色。
+     - brightness(99%): 调整亮度。
+     - contrast(102%): 调整对比度。
+  */
+}
+
+.controls .playmore span:hover {
+  border-radius: 6px;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 2px rgba(0, 0, 0, 0.2);
+}
