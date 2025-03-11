@@ -179,9 +179,9 @@
 .sidebar img {
   width: 100%;
   border-radius: 8px;
-  transition: width 0.3s ease, height 0.3s ease;
+  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease;
 }
 
 .sidebar img:hover {
-  width: 110%;
+  width: 105%;
 }

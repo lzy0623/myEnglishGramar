@@ -600,6 +600,7 @@ app.post('/api/discussion/upload/:questionId/comment', async (req, res) => {
   }
 });
 
+
 // 4-1.1上传用户的讨论题目
 app.post('/api/discussion/upload/question', async (req, res) => {
   const { userId, question, options, correctAnswer, analysis, type } = req.body;
@@ -615,9 +616,6 @@ app.post('/api/discussion/upload/question', async (req, res) => {
     res.status(500).json({ error: '服务器错误' });
   }
 });
-
-
-
 
 // 点赞或取消点赞
 app.post('/api/discussion/liked', async (req, res) => {
@@ -665,6 +663,90 @@ app.get('/api/discussion/get/:userId/user-likes', async (req, res) => {
   }
 });
 
+
+
+//5-1用户中心获取用户的社区讨论信息
+app.get('/api/userinfo/get/:userId/:type/discussion-data', async (req, res) => {
+  const { userId, type } = req.params;
+  if (!userId || !type) {
+    return res.status(400).json({ error: '参数无效,请刷新重试' });
+  }
+  try {
+    switch (type) {
+      // 获取用户讨论的点赞数、评论数和上传数
+      case 'discussionCount':
+        const [likedCount] = await pool.query(
+          'SELECT COUNT(*) AS count FROM discussion_likes WHERE user_id = ?', [userId]
+        );
+        const [commentCount] = await pool.query(
+          'SELECT COUNT(*) AS count FROM discussion_comments WHERE user_id = ?', [userId]
+        );
+        const [questionCount] = await pool.query(
+          'SELECT COUNT(*) AS count FROM discussion_questions WHERE user_id = ?', [userId]
+        );
+        return res.json({
+          likedCount: likedCount[0].count,
+          commentCount: commentCount[0].count,
+          questionCount: questionCount[0].count,
+        });
+      // 获取用户点赞的题目
+      case 'likedQuestions':
+        const [likedQuestions] = await pool.query(`
+          SELECT dq.*, u.nickname AS author, u.avatar AS avatar 
+          FROM discussion_likes dl 
+          JOIN discussion_questions dq ON dl.question_id = dq.id 
+          JOIN users u ON dq.user_id = u.id WHERE dl.user_id = ?`,
+          [userId]
+        );
+        return res.json(likedQuestions);
+      // 获取用户评论的题目
+      case 'commentedQuestions':
+        const [commentedQuestions] = await pool.query(`
+             SELECT 
+               dq.*, 
+               u.nickname AS author, 
+               u.avatar AS avatar,
+               dc.content AS comment_content,
+               dc.created_at AS comment_created_at
+             FROM 
+               discussion_comments dc 
+             JOIN 
+               discussion_questions dq ON dc.question_id = dq.id 
+             JOIN 
+               users u ON dq.user_id = u.id 
+              WHERE 
+             dc.user_id = ?`, [userId]);
+        // 将查询结果转换为更易读的格式
+        const formattedQuestions = commentedQuestions.reduce((acc, row) => {
+          const questionId = row.id;
+          const existingQuestion = acc.find(q => q.id === questionId);
+          if (existingQuestion) {
+            existingQuestion.comments.push({
+              content: row.comment_content,
+              created_at: row.comment_created_at
+            });
+          } else {
+            acc.push({
+              ...row,
+              comments: [{
+                content: row.comment_content,
+                created_at: row.comment_created_at
+              }]
+            });
+          }
+          return acc;
+        }, []);
+        return res.json(formattedQuestions);
+      // 获取用户上传的题目
+      case 'userQuestions':
+        const [userQuestions] = await pool.query(`SELECT * FROM discussion_questions WHERE user_id = ?`, [userId])
+        return res.json(userQuestions);
+      default:
+        return res.status(400).json({ error: '参数无效,请刷新重试' });
+    }
+  } catch (err) {
+  }
+});
 
 
 // 启动服务器

@@ -17,7 +17,7 @@
       <div class="box">
 
         <div class="user-info">
-          <img src=""  class="avatar">
+          <img src="" class="avatar">
           <div class="user-details">
             <h2>我的昵称</h2>
             <img src="images/icon/VIP_no.png" alt="VIP" class="img-vip">
@@ -37,7 +37,7 @@
               <p class="label">短文阅读量</p>
             </div>
             <div class="itembox">
-              <p class="value"><span>学者</span></p>
+              <p class="value" id="level"><span>学者</span></p>
               <p class="label">当前身份</p>
             </div>
           </div>
@@ -45,16 +45,16 @@
         <div class="framebox">
           <h3>社区管理</h3>
           <div class="content-box">
-            <div class="itembox">
-              <p class="value"><span>20</span></p>
+            <div class="itembox" onclick="uploadManageCommunity('likedQuestions')" >
+              <p class="value" id="likedCount"><span>20</span></p>
               <p class="label">我的点赞</p>
             </div>
-            <div class="itembox">
-              <p class="value"><span>10</span></p>
+            <div class="itembox" onclick="uploadManageCommunity('commentedQuestions')" >
+              <p class="value" id="commentCount"><span>10</span></p>
               <p class="label">我的评论</p>
             </div>
-            <div class="itembox">
-              <p class="value"><span>05</span></p>
+            <div class="itembox" onclick="uploadManageCommunity('userQuestions')">
+              <p class="value" id="questionCount"><span>05</span></p>
               <p class="label">我的上传</p>
             </div>
           </div>
