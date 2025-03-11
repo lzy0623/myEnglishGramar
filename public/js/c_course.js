@@ -1,3 +1,6 @@
+let subCourseTitle = '';
+
+
 // 获取主课程内容
 async function loadCourses() {
   try {
@@ -11,7 +14,7 @@ async function loadCourses() {
             <img src="images/icon/course_cap.png">
           </div>
           <h2>${course.title}</h2>
-          <button class="video-btn" onclick="playVideo('${course.video_url}');event.stopPropagation();">
+          <button class="video-btn" onclick="playVideo('${course.video_url}','${course.id}','${course.title}');event.stopPropagation();">
             <img src="images/icon/play_video.png" class="play-icon">观看视频
           </button>
           <img src="images/icon/pull_down.png" alt="" class="pulldown"  id="pulldown-${course.id}">
@@ -112,21 +115,37 @@ function toggleSubCourses(courseId) {
 }
 
 // 播放视频
-function playVideo(videoUrl) {
-  if (videoUrl) {
-    window.open(videoUrl, '_blank');
-  } else {
-    alert('暂无视频');
+function playVideo(videoUrl, courseId, courseTitle) {
+  const courseDada = {
+    videoUrl: videoUrl,
+    courseId: courseId,
+    courseTitle: courseTitle
   }
+  const courseDAtaString = JSON.stringify(courseDada);
+  window.open(`c_video.html?courseDAtaString=${courseDAtaString}`, '_blank');
 }
 
 // 跳转到知识点页面
 function loadKnowledgePoints(subCourseId) {
-  window.open(`c_knowledge.html?subCourseId=${subCourseId}`, '_blank')
+  if (subCourseId === 1) {
+    window.open(`c_knowledge.html?subCourseId=${subCourseId}`, '_blank')
+  } else if (getCurrentUser().vip) {
+    window.open(`c_knowledge.html?subCourseId=${subCourseId}`, '_blank')
+  }
+  else {
+    openVipModal();
+  }
 }
 // 跳转到练习题页面
 function loadExercises(subCourseId) {
-  window.open(`c_practice.html?subCourseId=${subCourseId}`, '_blank')
+  if (subCourseId === 1) {
+    window.open(`c_practice.html?subCourseId=${subCourseId}`, '_blank')
+  } else if (getCurrentUser().vip) {
+    window.open(`c_practice.html?subCourseId=${subCourseId}`, '_blank')
+  }
+  else {
+    openVipModal();
+  }
 }
 
 //----管理员功能----

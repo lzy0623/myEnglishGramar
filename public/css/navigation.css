@@ -118,3 +118,85 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
 }
+
+
+
+
+/* 会员弹窗样式 */
+.vipModal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.vipModal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
+}
+
+.vipModal .closeVipModal {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.closeVipModal:hover,
+.closeVipModal:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vipModal .vip-packages {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.vipModal .package {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  width: 30%;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.vipModal .package:hover {
+  transform: scale(1.05);
+}
+
+.vipModal .package h4 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.vipModal .package p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.vipModal .confirm-btnvip {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px;
+  background-color: rgba(121, 72, 234, 1);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}

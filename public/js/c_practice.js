@@ -1,8 +1,10 @@
 let currentExerciseIndex = 0; // 当前练习题的索引
 let exercises = []; // 存储所有练习题
-let exercisesTitle = '';
-let userAnswers = [];//存储答案信息
+let exercisesTitle = '';// 存储练习题的标题
+let currentExerciseId = 0;// 存储当前练习题的 ID
+let userAnswers = [];//存储用户答题的答案信息
 const subCourseId = new URLSearchParams(window.location.search).get('subCourseId');// 解析获取子课程 ID
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
 // 获取练习题内容
 async function loadExercises(subCourseId) {
@@ -12,6 +14,11 @@ async function loadExercises(subCourseId) {
     const result = await response.json();
     exercises = result.exercises;
     exercisesTitle = result.title;
+    // 获取用户答题记录
+    const exercise = 'exercise'
+    const responseUserAnswer = await fetch(`http://localhost:3000/api/user/get/${exercise}/${currentUser.id}/progress?subCourseId=${subCourseId}`,);
+    const userAnswerData = await responseUserAnswer.json();
+    userAnswers = userAnswerData.data
     // 显示第一道题
     showExercise(currentExerciseIndex);
   } catch (err) {
@@ -21,6 +28,7 @@ async function loadExercises(subCourseId) {
 // 显示指定索引的练习题
 function showExercise(index) {
   const exercise = exercises[index];
+  currentExerciseId = exercise.id
   const contentContainer = document.getElementById('practice-content');
   contentContainer.innerHTML = exercises.length > 0 ? `
     <div class="box">
@@ -31,31 +39,29 @@ function showExercise(index) {
         <form>
           ${exercise.options.map((option, i) => `
             <div class="option-group">
-              <label onclick="selectOption('${exercise.correct_answer}',event)">
+              <label onclick="selectOption('${exercise.correct_answer}','${exercise.id}',event)">
                 <input type="radio" name="answer" value="${String.fromCharCode(65 + i)}">
                 ${option}
                 <span></span>
               </label>
             </div>`).join('')}
         </form>
-        <div class="analysis"><p><span>解析:</span>为什么</p></div>
+        <div class="analysis"><p><span>解析:${exercise.analysis}</span></p></div>
         <div class="exercise-navigation">
           <button class="nav-btn" id="pre-btn" onclick="prevExercise()">上一个</button>
           <button class="nav-btn" id="next-btn" onclick="nextExercise()">下一个</button>
+          <button class="nav-btn" id="save-btn" onclick="saveExercise()">保存记录</button>
         </div>
      </div>
    </div>
   <div id="upload-practice-box"></div>`: `<div id="upload-practice-box"></div>`;
+  if (currentUser.admin) {
+    document.getElementById('upload-practice-box').innerHTML = `<div class="upload-information" onclick="uploadSubCourseExcercise(${subCourseId})">添加练习题</div>`;
 
-  if (localStorage.getItem('currentUser')) {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser.admin) {
-      document.getElementById('upload-practice-box').innerHTML = `<div class="upload-information" onclick="uploadSubCourseExcercise(${subCourseId})">添加练习题</div>`;
-    }
   }
 
   // 恢复用户答案
-  const userAnswer = userAnswers.find(answer => answer.index === index);
+  const userAnswer = userAnswers.find(answer => answer.exerciseId === currentExerciseId.toString());
   if (userAnswer) {
     const selectedRadio = document.querySelector(`input[value="${userAnswer.answer}"]`);
     if (selectedRadio) {
@@ -75,10 +81,16 @@ function showExercise(index) {
 }
 
 // 选择选项比对答案
-function selectOption(correctAnswer, event) {
-  const selectedOption = event.target.querySelector('input[type="radio"]');
+function selectOption(correctAnswer, exerciseId, event) {
+  event.stopPropagation(); // 阻止事件冒泡和捕获
+  // 确保 event.target 是 label 元素
+  let labelElement = event.target;
+  if (labelElement.tagName.toLowerCase() !== 'label') {
+    labelElement = labelElement.closest('label');
+  }
+  const selectedOption = labelElement.querySelector('input[type="radio"]');
   const selectedValue = selectedOption.value;
-  const spanElement = event.target.querySelector('span');
+  const spanElement = labelElement.querySelector('span');
 
   // 清除所有选项的提示信息
   const allSpans = document.querySelectorAll('.option-group span');
@@ -96,25 +108,26 @@ function selectOption(correctAnswer, event) {
     spanElement.textContent = '❌ 错误！';
   }
   // 保存用户答案
-  const existingAnswer = userAnswers.find(answer => answer.index === currentExerciseIndex);
+  const existingAnswer = userAnswers.find(answer => answer.exerciseId === exerciseId);
   if (existingAnswer) {
     existingAnswer.answer = selectedValue; // 更新已有答案
   } else {
-    userAnswers.push({ index: currentExerciseIndex, answer: selectedValue }); // 新增答案
+    userAnswers.push({ exerciseId: exerciseId, answer: selectedValue }); // 新增答案
   }
-
   // 更新“下一个”按钮状态
   updateNextButtonState();
 }
 function updateNextButtonState() {
   const nextButton = document.getElementById('next-btn');
-  const userAnswer = userAnswers.find(answer => answer.index === currentExerciseIndex);
-
+  const saveButton = document.getElementById('save-btn');
+  const userAnswer = userAnswers.find(answer => answer.exerciseId === currentExerciseId.toString());
   if (userAnswer && userAnswer.answer === exercises[currentExerciseIndex].correct_answer) {
     nextButton.style.display = 'block';
+    saveButton.style.display = 'block';
     document.querySelector('.analysis').style.display = 'block';
   } else {
     nextButton.style.display = 'none';
+    saveButton.style.display = 'none';
     document.querySelector('.analysis').style.display = 'none';
   }
 }
@@ -129,10 +142,9 @@ function prevExercise() {
     alert('已经是第一题了')
   }
 }
-
 // 下一题
 function nextExercise() {
-  const userAnswer = userAnswers.find(answer => answer.index === currentExerciseIndex);
+  const userAnswer = userAnswers.find(answer => answer.exerciseId === currentExerciseId.toString());
   if (userAnswer && userAnswer.answer === exercises[currentExerciseIndex].correct_answer) {
     if (currentExerciseIndex < exercises.length - 1) {
       currentExerciseIndex++;
@@ -141,6 +153,29 @@ function nextExercise() {
     else {
       alert('已经是最后一题了')
     }
+  }
+}
+//保存做题记录
+async function saveExercise() {
+  if (userAnswers.length === 0) {
+    alert('请先作答')
+    return
+  }
+  const exercise = 'exercise'
+  const response = await fetch(`http://localhost:3000/api/user/upload/${exercise}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: currentUser.id,
+      subCourseId: subCourseId,
+      data: userAnswers
+    })
+  })
+  const result = await response.json();
+  if (response.ok) {
+    alert('答题记录保存成功' + result.message)
+  } else {
+    alert('答题记录保存失败' + result.errorj)
   }
 }
 

@@ -46,8 +46,9 @@ function logout() {
   }
 }
 
+//页面加载时更新用户信息
 window.onload = function () {
-  const currentUser = getCurrentUser()
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
   if (currentUser) {
     updateUserInfo(currentUser)
     document.querySelector('.user-info').insertAdjacentHTML('beforeend', `
@@ -59,7 +60,63 @@ window.onload = function () {
   getUserDiscussionInfo(currentUser.id, 'discussionCount')
 }
 
-
+//跳转社区管理页面
 function uploadManageCommunity(type) {
   window.open(`f_manageCommunity.html?type=${type}`, '_blank')
+}
+
+
+// 弹窗控制
+function showInfoModal() {
+  document.getElementById('infoModal').style.display = 'block';
+  document.getElementById('previewAvatar').src = document.querySelector('.avatar').src;
+  document.getElementById('nicknameInput').value = document.querySelector('.user-details h2').innerText;
+}
+
+//关闭弹窗
+function closeModal() {
+  document.getElementById('infoModal').style.display = 'none';
+}
+
+// 头像预览
+document.getElementById('avatarInput').addEventListener('change', function (e) {
+  const reader = new FileReader();
+  reader.onload = function () {
+    document.getElementById('previewAvatar').src = reader.result;
+  }
+  reader.readAsDataURL(e.target.files[0]);
+});
+
+// 提交修改
+async function submitUserInfo() {
+  const formData = new FormData();
+  const avatarFile = document.getElementById('avatarInput').files[0];
+  const nickname = document.getElementById('nicknameInput').value;
+  const currentUser = getCurrentUser();
+
+  formData.append('userId', currentUser.id);
+  formData.append('username', currentUser.username);
+  formData.append('nickname', nickname);
+  if (avatarFile) formData.append('avatar', avatarFile);
+
+  console.log('表单数据', formData)
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+  try {
+    const response = await fetch('http://localhost:3000/api/userinfo/update-info', {
+      method: 'POST',
+      body: formData
+    });
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(result.message);
+      const responseUser = await fetch(`http://localhost:3000/api/user/${currentUser.id}/current-user`);
+      const user = await responseUser.json();
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    }
+  } catch (error) {
+    console.error('修改失败:', error);
+  }
 }

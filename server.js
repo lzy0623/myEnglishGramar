@@ -24,7 +24,7 @@ const path = require('path');//处理文件路径
 const fs = require('fs');
 const { timeLog } = require('console');
 const { type } = require('os');
-const { title } = require('process');
+const { title, resourceUsage } = require('process');
 
 
 
@@ -119,13 +119,13 @@ app.post('/api/user/forgot-password', async (req, res) => {
 });
 
 // 0-4新增获取当前用户信息接口
-app.get('/api/user/current-user', async (req, res) => {
-  const { username } = req.query;
-  if (!username) {
+app.get('/api/user/:userId/current-user', async (req, res) => {
+  const { userId } = req.params
+  if (!userId) {
     return res.status(400).json({ error: '用户名为空,请先登录' });
   }
   try {
-    const [users] = await pool.query('SELECT * FROM users WHERE username = ? LIMIT 1', [username]);
+    const [users] = await pool.query('SELECT * FROM users WHERE id = ? LIMIT 1', [userId]);
     if (users.length > 0) {
       const user = users[0];
       res.json({
@@ -435,6 +435,39 @@ app.post('/api/upload/sub-course/:subCourseId/exercise', async (req, res) => {
     });
   }
 });
+
+// 2-5课程视频评论处理
+app.post('/api/course/video/:type/comment', async (req, res) => {
+  const { type } = req.params;
+  try {
+    if (type == 'upload') {
+      const { userId, courseId, content } = req.body;
+      await pool.query(
+        'INSERT INTO c_videocomments (user_id, course_id, content) VALUES (?, ?, ?)',
+        [userId, courseId, content]
+      );
+      res.status(201).json({ message: '评论成功' });
+    }
+    else if (type == 'get') {
+      const { courseId } = req.body;
+      const [comments] = await pool.query(
+        `SELECT c.id, c.user_id, c.content, c.created_at, 
+        u.avatar, u.nickname AS author 
+        FROM c_videocomments c 
+        JOIN users u ON c.user_id = u.id 
+        WHERE c.course_id = ?`, [courseId]
+      );
+      res.json(comments);
+    }
+    else {
+      return res.status(400).json({ error: `请明确请求类型参数type:${type}` });
+    }
+  } catch (err) {
+    console.error('评论失败:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+});
+
 
 
 
@@ -747,6 +780,158 @@ app.get('/api/userinfo/get/:userId/:type/discussion-data', async (req, res) => {
   } catch (err) {
   }
 });
+
+
+// 配置multer图片存储
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, 'public/images/imgavatars'));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = `${Date.now()}${ext}`;
+    cb(null, filename);
+  }
+});
+
+// 配置Multer中间件，用于处理文件上传
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 限制文件大小为5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true); // 文件类型符合要求
+    } else {
+      cb(new Error('仅允许上传图片文件')); // 文件类型不符合要求
+    }
+  }
+});
+//5-2更新用户信息
+app.post('/api/userinfo/update-info', avatarUpload.single('avatar'), async (req, res) => {
+  const { userId, username, nickname } = req.body;
+  let imagePath = req.file ? `${req.file.filename}` : null;
+  try {
+    // 验证用户存在
+    const [user] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+    if (!user.length) return res.status(404).json({ error: '用户不存在或者未登录' });
+    // 更新头像逻辑
+    if (!imagePath) {
+      imagePath = user[0].avatar;
+    }
+    // 更新数据库
+    await pool.query(
+      'UPDATE users SET nickname = ?, avatar = ? WHERE id = ?',
+      [nickname, imagePath, userId]
+    );
+    res.json({ message: '更新成功' });
+  } catch (err) {
+    res.status(500).json({ error: '服务器错误', details: err.message });
+  }
+});
+//5-3开通会员
+app.post('/api/userinfo/update-vip', async (req, res) => {
+  const { userId, vipType } = req.body;
+  if (!userId || !vipType) {
+    return res.status(400).json({ error: '参数为空,请重试' });
+  }
+  try {
+    const [result] = await pool.query(`SELECT vip FROM users WHERE id = ? AND vip = ? LIMIT 1`, [userId, vipType])
+    if (result.length > 0) {
+      return res.status(400).json({ error: '你已经开通过会员了' });
+    }
+    await pool.query('UPDATE users SET vip = ? WHERE id = ?', [vipType, userId]
+    );
+    res.json({ message: '你已经成功订购会员' });
+  } catch (err) {
+    res.status(500).json({ error: '服务器错误', details: err.message });
+  }
+});
+
+
+
+
+//6-1用户进度过程信息上传
+app.post('/api/user/upload/:type/progress', async (req, res) => {
+  const { type } = req.params
+  const { userId, data } = req.body
+  if (!Array.isArray(data)) {
+    data = [data]
+  }
+  try {
+    switch (type) {
+      case 'community':
+        const [result] = await pool.query(`SELECT community_question FROM user_progress_community WHERE user_id = ? LIMIT 1`, [userId])
+        if (result.length === 0) {
+          const dataString = JSON.stringify(data)
+          await pool.query(`INSERT INTO user_progress_community (user_id, community_question) VALUES (?, ?)`, [userId, dataString])
+          return res.json({ message: '插入成功,首次保存' })
+        } else {
+          const resultData = result[0].community_question
+          const newData = data.concat(resultData)
+          const newDataString = JSON.stringify(newData)
+          await pool.query(`UPDATE user_progress_community SET community_question = ? WHERE user_id = ?`, [newDataString, userId])
+          return res.json({ message: '插入成功,非首次保存' })
+        }
+      case 'exercise':
+        const { subCourseId } = req.body
+        console.log('6-1subCourseId:', subCourseId)
+        const [resultExercise] = await pool.query(`SELECT course_question FROM user_progress_exercise WHERE user_id = ? AND subcourse_id= ? LIMIT 1`, [userId, subCourseId])
+        if (resultExercise.length === 0) {
+          const dataString = JSON.stringify(data)
+          await pool.query(`INSERT INTO user_progress_exercise (user_id, subcourse_id, course_question) VALUES (?, ?, ?)`, [userId, subCourseId, dataString])
+          return res.json({ message: '插入成功,首次保存' })
+        } else {
+          const dataString = JSON.stringify(data)
+          await pool.query(`UPDATE user_progress_exercise SET course_question = ? WHERE user_id = ? AND subcourse_id= ?`, [dataString, userId, subCourseId])
+          return res.json({ message: '插入成功,非首次保存' })
+        }
+    }
+  }
+  catch (err) {
+    console.error('6-1用户进度过程信息错误:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+}
+)
+
+//6-2用户进度过程信息获取
+app.get('/api/user/get/:type/:userId/progress', async (req, res) => {
+  const { type, userId } = req.params
+  try {
+    switch (type) {
+      case 'community':
+        const [result] = await pool.query(`SELECT community_question FROM user_progress_community WHERE user_id = ? LIMIT 1`, [userId])
+        if (result.length === 0) {
+          return res.json({ data: [] });
+        }
+        const resultData = result[0].community_question
+        return res.json({ data: resultData })
+
+      case 'exercise':
+        const { subCourseId } = req.query;
+        const [resultExercise] = await pool.query(`SELECT course_question FROM user_progress_exercise WHERE user_id = ? AND subcourse_id= ? LIMIT 1`, [userId, subCourseId])
+        if (resultExercise.length === 0) {
+          return res.json({ data: [] })
+        }
+        const resultExerciseData = resultExercise[0].course_question
+        return res.json({ data: resultExerciseData })
+
+      case 'course':
+        const [resultCourse] = await pool.query(`SELECT course FROM user_progress WHERE user_id = ? LIMIT 1`, [userId])
+        if (resultCourse.length === 0) {
+          return res.json({ data: [] })
+        }
+        const resultCourseData = resultCourse[0].course
+        return res.json({ data: resultCourseData })
+      default:
+        return res.status(400).json({ error: '参数无效,请刷新重试' });
+    }
+  } catch (err) {
+    console.error('获取错误:', err);
+    res.status(500).json({ error: '服务器错误' });
+  }
+})
+
 
 
 // 启动服务器

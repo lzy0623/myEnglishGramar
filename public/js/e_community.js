@@ -1,13 +1,15 @@
-let likedIds = [];
+let likedIds = [];//记录点赞的题目id用来加载
 let isType = false;//选择题目类型进行题目加载的标识符
+let correctQeuestionIds = [];//记录已经做题并且正确的题目id下次就不在加载
 // 加载全部讨论题目
 async function loadDiscussionQuestions(questionType) {
   try {
     const contentContainer = document.getElementById('discussion-box');
-    const userId = getCurrentUser('id');
+    const userId = getCurrentUser().id;
     //获取所有题目信息
     const response = await fetch(`http://localhost:3000/api/discussion/get/${questionType}/questions`);
     const questions = await response.json();
+    console.log('题目信息', questions)
     if (!response.ok) {
       contentContainer.innerHTML = `<p>后端响应失败:${questions.error}</p>`;
       contentContainer.style.color = 'red';
@@ -18,7 +20,16 @@ async function loadDiscussionQuestions(questionType) {
     const { likedQuestionIds } = await likesResponse.json();
     likedIds = likedQuestionIds;
 
-    contentContainer.innerHTML = questions.map(question => `
+    //获取用户的做题记录
+    const community = 'community'
+    const correctResponse = await fetch(`http://localhost:3000/api/user/get/${community}/${userId}/progress`);
+    const correctQuestionIds = await correctResponse.json();
+    const correctQuestionIdsArray = correctQuestionIds.data.map(id => parseInt(id, 10));
+    console.log('做题记录', correctQuestionIdsArray, typeof correctQuestionIdsArray)
+    const filteredQuestions = questions.filter(question => !correctQuestionIdsArray.includes(question.id))
+    console.log('筛选后题目', filteredQuestions)
+
+    contentContainer.innerHTML = filteredQuestions.map(question => `
       <div class="discussion-card">
         <div class="discussion-header">
           <div class="headphoto">
@@ -60,7 +71,7 @@ async function loadDiscussionQuestions(questionType) {
       </div>`).join('');
 
     //初始化每个题目的互动数据
-    questions.forEach(question => {
+    filteredQuestions.forEach(question => {
       loadLikes(question.id);
       loadCommentCount(question.id);
     });
@@ -173,14 +184,43 @@ function selectOption(correctAnswer, selectedAnswer, questionId, event) {
   if (selectedAnswer === correctAnswer) {
     event.target.classList.add('correct');
     event.target.querySelector('.optionHint').textContent = `✅答案正确!`;
+    if (!correctQeuestionIds.includes(questionId)) {
+      correctQeuestionIds.push(questionId)
+    }
   }
   else {
     event.target.classList.add('incorrect');
     event.target.querySelector('.optionHint').textContent = `❌答案错误!`;
+    if (correctQeuestionIds.includes(questionId)) {
+      correctQeuestionIds.splice(correctQeuestionIds.indexOf(questionId), 1)
+    }
   }
 }
 
-
+//保存用户答题记录
+async function saveQuestionRecords() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  if (correctQeuestionIds.length === 0) {
+    alert('请先答题')
+    return
+  }
+  const userId = currentUser.id
+  const community = 'community'
+  const response = await fetch(`http://localhost:3000/api/user/upload/${community}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: userId,
+      data: correctQeuestionIds
+    })
+  })
+  const result = await response.json();
+  if (response.ok) {
+    alert('答题记录保存成功' + result.message)
+  } else {
+    alert('答题记录保存失败' + result.errorj)
+  }
+}
 //用户自上传讨论题目处理函数
 function uploadDiscussion() {
   window.open('e_uploading.html', '_blank');
