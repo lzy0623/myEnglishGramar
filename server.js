@@ -1,3 +1,6 @@
+import {dbConfig} from './config.js'
+
+
 const express = require('express');// 引入Express框架，用于创建web服务器
 const cors = require('cors');// 引入CORS中间件，用于处理跨域请求
 const mysql = require('mysql2/promise');// 引入MySQL2的Promise实现，用于数据库操作
@@ -5,10 +8,10 @@ const app = express();// 创建Express应用实例
 
 // 数据库配置
 const pool = mysql.createPool({
-  host: 'localhost',//数据库地址
-  user: 'root',//数据库用户名
-  password: '123456', //数据库密码
-  database: 'english_grammar_system',//数据库名
+  host: dbConfig.host,//数据库地址
+  user: dbConfig.user,//数据库用户名
+  password: dbConfig.password, //数据库密码
+  database: dbConfig.database,//数据库名
   waitForConnections: true,//是否等待连接
   connectionLimit: 10//最大连接数
 });
@@ -61,7 +64,6 @@ app.post('/api/user/register', async (req, res) => {
 // 0-2登录接口
 app.post('/api/user/login', async (req, res) => {
   const { username, password } = req.body;
-  // 检查用户名和密码是否为空
   if (!username || !password) {
     return res.status(400).json({ error: '用户名和密码不能为空' });
   }
@@ -74,7 +76,6 @@ app.post('/api/user/login', async (req, res) => {
     const user = users[0];
     if (password === user.password) {
       res.json({
-        message: '登录成功',
         user: {
           id: user.id,//用户id
           username: user.username,//用户名
@@ -151,7 +152,7 @@ app.get('/api/user/:userId/current-user', async (req, res) => {
 
 
 
-//1--------------------- 每日一句接口管理-------------------------
+//1---------------------------------每日一句模块api----------------------------------
 //配置multer图片存储
 const imgstorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -237,7 +238,7 @@ app.post('/api/upload/sentence', upload.single('image'), async (req, res) => {
 
 
 
-//2----------------------------------语法课程接口----------------------------------------------------
+//2------------------------------------语法课程api-----------------------------------------
 //视频上传配置 
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -260,7 +261,7 @@ const videoUpload = multer({
   }
 });
 
-//2-1获取所有主课程
+//2-1.1获取所有主课程
 app.get('/api/get/courses', async (req, res) => {
   try {
     const [courses] = await pool.query('SELECT * FROM courses');
@@ -270,7 +271,7 @@ app.get('/api/get/courses', async (req, res) => {
   }
 });
 
-// 2-1.1上传添加主课程
+// 2-1.2上传添加主课程
 app.post('/api/upload/course', videoUpload.single('video'), async (req, res) => {
   try {
     const { title, description, userId, userName } = req.body;
@@ -303,7 +304,7 @@ app.post('/api/upload/course', videoUpload.single('video'), async (req, res) => 
 });
 
 
-//2-2获取某个主课程的子课程
+//2-2.1获取某个主课程的子课程
 app.get('/api/get/courses/:courseId/sub-courses', async (req, res) => {
   const { courseId } = req.params;
   if (!courseId) {
@@ -317,7 +318,7 @@ app.get('/api/get/courses/:courseId/sub-courses', async (req, res) => {
   }
 });
 
-//2-2.1添加上传某个主课程的子课程
+//2-2.2加上传某个主课程的子课程
 app.post('/api/upload/courses/:courseId/sub-course', async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -356,7 +357,7 @@ app.post('/api/upload/courses/:courseId/sub-course', async (req, res) => {
 });
 
 
-//2-3获取某个子课程的知识点
+//2-3.1获取某个子课程的知识点
 app.get('/api/get/sub-courses/:subCourseId/knowledge', async (req, res) => {
   const { subCourseId } = req.params;
   try {
@@ -830,16 +831,16 @@ app.post('/api/userinfo/update-info', avatarUpload.single('avatar'), async (req,
 });
 //5-3开通会员
 app.post('/api/userinfo/update-vip', async (req, res) => {
-  const { userId, vipType } = req.body;
-  if (!userId || !vipType) {
+  const { userId, isVip } = req.body;
+  if (!userId || !isVip) {
     return res.status(400).json({ error: '参数为空,请重试' });
   }
   try {
-    const [result] = await pool.query(`SELECT vip FROM users WHERE id = ? AND vip = ? LIMIT 1`, [userId, vipType])
+    const [result] = await pool.query(`SELECT vip FROM users WHERE id = ? AND vip = ? LIMIT 1`, [userId, isVip])
     if (result.length > 0) {
       return res.status(400).json({ error: '你已经开通过会员了' });
     }
-    await pool.query('UPDATE users SET vip = ? WHERE id = ?', [vipType, userId]
+    await pool.query('UPDATE users SET vip = ? WHERE id = ?', [isVip, userId]
     );
     res.json({ message: '你已经成功订购会员' });
   } catch (err) {

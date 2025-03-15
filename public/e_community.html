@@ -6,7 +6,7 @@
   <title>语法在线 - 社区讨论</title>
   <link rel="stylesheet" href="css/navigation.css">
   <link rel="stylesheet" href="css/e_community.css">
-  <script src="js/navigation.js"></script>
+  <script type="module" src="js/navigation.js"></script>
 </head>
 
 <body>
@@ -19,7 +19,7 @@
       <div class="filter-bar">
         <div>
           <p id="isTips"></p>
-          <select id="selectQuestionType" onchange="selectQuestionType(this.value)">
+          <select id="selectQuestionType">
             <option>全部题目</option>
             <option>句子成分</option>
             <option>十大词性</option>
@@ -27,10 +27,10 @@
           </select>
         </div>
         <div>
-          <button class="upload-btn" onclick="uploadDiscussion()">上传题目讨论 +</button>
+          <button class="upload-btn" id="upload-question-btn">上传题目讨论 +</button>
         </div>
         <div>
-          <button class="save-btn" onclick="saveQuestionRecords()">保存做题记录</button>
+          <button class="save-btn" id="save-questions-btn">保存做题记录</button>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
       </div>
 
     </div>
-    <script src="js/e_community.js"></script>
+    <script type="module" src="js/e_community.js"></script>
 </body>
 
 </html>

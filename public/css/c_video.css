@@ -1,11 +1,13 @@
 body {
   padding: 0;
 }
-.course-title{
+
+.course-title {
   letter-spacing: 2px;
   font-size: 18px;
   font-weight: 550;
 }
+
 .video-container {
   margin-top: 12px;
 }
@@ -28,6 +30,8 @@ body {
 
 .comment-card .comment-header img {
   width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 
 .comment-card .comment-body {
@@ -62,6 +66,7 @@ body {
 
 .comment-input {
   max-width: 50%;
+  min-width: 900px;
   padding: 10px;
   border-radius: 8px;
   margin: 0 auto;

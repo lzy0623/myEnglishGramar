@@ -13,17 +13,19 @@
     <div class="content-wrapper">
 
       <div class="course-title">
-        <p></p>
       </div>
+      
       <div class="video-container">
         <video id="videoPlayer" controls autoplay>
           <source id="videoSource" src="" type="video/mp4">
           您的浏览器不支持 video 标签。
         </video>
       </div>
+
       <div class="comment-box" id="comment-box">
         <!-- 评论区域 -->
       </div>
+
       <div class="comment-input">
         <input type="text" id="comment-content" placeholder="请输入评论内容" required>
         <button id="submitComment">发送</button>
@@ -31,7 +33,7 @@
 
     </div>
   </div>
-  <script src="js/c_video.js"></script>
+  <script type="module" src="js/c_video.js"></script>
 </body>
 
 </html>

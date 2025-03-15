@@ -81,6 +81,12 @@ body {
 
 .form-group input {
   width: 90%;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+  outline: none;
+  border: 1px solid rgba(42, 130, 228, 1);
 }
 
 .form-group select option {
@@ -119,6 +125,7 @@ input[name="correctAnswer"] {
   letter-spacing: 2px;
   cursor: pointer;
   border: none;
+  transition: all 0.3s ease-in-out;
 }
 
 .cancel-btn {

@@ -1,3 +1,5 @@
+import { config } from '../../config.js';
+
 //用户等级的枚举类型
 const userLevel = {
   0: 'beginner',
@@ -8,9 +10,8 @@ const userLevel = {
 //根据请求类型获取用户讨论信息
 async function getUserDiscussionInfo(userId, type) {
   try {
-    const response = await fetch(`http://localhost:3000/api/userinfo/get/${userId}/${type}/discussion-data`);
+    const response = await fetch(`${config.API_BASE_URL}/api/userinfo/get/${userId}/${type}/discussion-data`);
     const discussionCount = await response.json();
-    console.log(discussionCount)
     if (!response.ok) {
       alert(discussionCount.error)
     }
@@ -37,55 +38,71 @@ function updateUserInfo(user) {
   document.getElementById('level').innerHTML = `<span>${userLevel[user.level]}</span>`
 }
 
-//退出登录
-function logout() {
-  const confirmed = confirm('确定要退出登录吗？')
-  if (confirmed) {
-    localStorage.removeItem('currentUser')
-    window.location.href = 'a_login.html'
-  }
-}
 
-//页面加载时更新用户信息
-window.onload = function () {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+//页面加载后绑定点击事件
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUser = getCurrentUser()
   if (currentUser) {
     updateUserInfo(currentUser)
     document.querySelector('.user-info').insertAdjacentHTML('beforeend', `
-      <div class="logout-btn" onclick="logout()">
-        退出登录
-      </div>
-      `)
+      <div class="logout-btn" id="logout">退出登录</div>`)
+    getUserDiscussionInfo(currentUser.id, 'discussionCount')
   }
-  getUserDiscussionInfo(currentUser.id, 'discussionCount')
-}
 
-//跳转社区管理页面
-function uploadManageCommunity(type) {
-  window.open(`f_manageCommunity.html?type=${type}`, '_blank')
-}
+  //点击进入管理社区
+  document.querySelector('.content-box.community').addEventListener('click', (event) => {
+    const target = event.target
+    console.log(target)
+    if (target.closest('.itembox')) {
+      window.open(`f_manageCommunity.html`, '_blank')
+      event.stopPropagation()
+    }
+  })
 
+  document.querySelector('.content-wrapper').addEventListener('click', (event) => {
+    const target = event.target
+    //点击展示修改个人信息弹窗
+    if (target.id === 'showInfoModal') {
+      document.getElementById('infoModal').style.display = 'block';
+      document.getElementById('previewAvatar').src = document.querySelector('.avatar').src;
+      document.getElementById('nicknameInput').value = document.querySelector('.user-details h2').innerText;
+      event.stopPropagation();
+    }
+    //点击退出登录
+    else if (target.id === 'logout') {
+      if (confirm('确定要退出登录吗？')) {
+        localStorage.removeItem('currentUser')
+        window.location.href = 'a_login.html'
+        event.stopPropagation();
+      }
+    }
+    else if (target.id === 'openVipModal') {
+      openVipModal()
+    }
+  })
+  // 头像预览
+  document.getElementById('avatarInput').addEventListener('change', function (e) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      document.getElementById('previewAvatar').src = reader.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);
+  });
 
-// 弹窗控制
-function showInfoModal() {
-  document.getElementById('infoModal').style.display = 'block';
-  document.getElementById('previewAvatar').src = document.querySelector('.avatar').src;
-  document.getElementById('nicknameInput').value = document.querySelector('.user-details h2').innerText;
-}
+  // 提交修改信息
+  document.getElementById('infoModal').addEventListener('click', (event) => {
+    const target = event.target;
+    console.log(target);
+    if (target.id === 'submitUserInfo') {
+      submitUserInfo();
+      event.stopPropagation();
+    } else if (target.classList.contains('close')) {
+      document.getElementById('infoModal').style.display = 'none';
+      event.stopPropagation();
+    }
+  });
 
-//关闭弹窗
-function closeModal() {
-  document.getElementById('infoModal').style.display = 'none';
-}
-
-// 头像预览
-document.getElementById('avatarInput').addEventListener('change', function (e) {
-  const reader = new FileReader();
-  reader.onload = function () {
-    document.getElementById('previewAvatar').src = reader.result;
-  }
-  reader.readAsDataURL(e.target.files[0]);
-});
+})
 
 // 提交修改
 async function submitUserInfo() {
@@ -104,7 +121,7 @@ async function submitUserInfo() {
     console.log(key, value);
   }
   try {
-    const response = await fetch('http://localhost:3000/api/userinfo/update-info', {
+    const response = await fetch(`${config.API_BASE_URL}/api/userinfo/update-info`, {
       method: 'POST',
       body: formData
     });
@@ -112,7 +129,7 @@ async function submitUserInfo() {
 
     if (response.ok) {
       alert(result.message);
-      const responseUser = await fetch(`http://localhost:3000/api/user/${currentUser.id}/current-user`);
+      const responseUser = await fetch(`${config.API_BASE_URL}/api/user/${currentUser.id}/current-user`);
       const user = await responseUser.json();
       localStorage.setItem('currentUser', JSON.stringify(user));
     }

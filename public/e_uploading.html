@@ -6,7 +6,7 @@
   <title>语法在线 - 上传题目</title>
   <link rel="stylesheet" href="css/navigation.css">
   <link rel="stylesheet" href="css/e_uploading.css">
-  <script src="js/navigation.js"></script>
+  <script type="module" src="js/navigation.js"></script>
 </head>
 
 <body>
@@ -14,7 +14,7 @@
     <div class="content-wrapper">
       <div class="box">
         <div class="boxpage">
-          <form onsubmit="submitDiscussionQuestion(event)">
+          <form id="upload-discussion-form">
             <div class="form-group">
               <label for="type">题目类型</label>
               <select id="type">
@@ -70,7 +70,7 @@
       </div>
     </div>
   </div>
-  <script src="js/e_uploading.js"></script>
+  <script type="module" src="js/e_uploading.js"></script>
 </body>
 
 </html>

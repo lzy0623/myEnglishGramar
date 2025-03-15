@@ -1,3 +1,4 @@
+import { config } from '../../config.js';
 // 提交题目
 async function submitDiscussionQuestion(event) {
   event.preventDefault(); // 阻止表单默认提交行为
@@ -22,7 +23,7 @@ async function submitDiscussionQuestion(event) {
   try {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const userId = currentUser.id;
-    const response = await fetch('http://localhost:3000/api/discussion/upload/question', {
+    const response = await fetch(`${config.API_BASE_URL}/api/discussion/upload/question`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, question, options, correctAnswer, analysis, type })
@@ -39,6 +40,7 @@ async function submitDiscussionQuestion(event) {
     alert('上传题目失败,可能网络未连接或未登录');
   }
 }
+document.getElementById('upload-discussion-form').addEventListener('submit',submitDiscussionQuestion)
 
 // 取消上传
 document.querySelector('.cancel-btn').addEventListener('click', () => {

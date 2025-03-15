@@ -50,7 +50,6 @@
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       const userId = currentUser.id;
       const userName = currentUser.username;
-      console.log('用户id', userId, typeof userId);
       // 构建表单数据
       const formData = new FormData();
       formData.append('title', courseName);
@@ -69,7 +68,6 @@
 
         if (response.ok) {
           alert(`上传成功!主课程ID: ${result.id}`);
-          //document.querySelector('form').reset();
         } else {
           throw new Error(result.error || '上传失败');
         }

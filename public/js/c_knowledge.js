@@ -1,10 +1,13 @@
+import { config } from '../../config.js';
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 // 获取知识点内容
 async function loadKnowledgePoints(subCourseId) {
   try {
     // 调用后端 API 获取子课程的知识点
-    const response = await fetch(`http://localhost:3000/api/get/sub-courses/${subCourseId}/knowledge`);
+    const response = await fetch(`${config.API_BASE_URL}/api/get/sub-courses/${subCourseId}/knowledge`);
     const knowledgePoints = await response.json();
     const contentContainer = document.getElementById('knowledge-content');
+
     contentContainer.innerHTML = knowledgePoints.map(knowledgePoint => `
       <div class="grammar-section">
         <h2 class="section-title">
@@ -25,13 +28,7 @@ async function loadKnowledgePoints(subCourseId) {
       </div>
       `).join('') + `<div id="upload-knowledge-box"></div>`;
 
-    if (localStorage.getItem('currentUser')) {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      if (currentUser.admin) {
-        document.getElementById('upload-knowledge-box').innerHTML = `
-        <div class="upload-information" onclick="uploadSubCourseKnowledge(${subCourseId})">添加知识点</div>`;
-      }
-    }
+    bindEventListeners(subCourseId);
   } catch (err) {
     console.error('加载知识点失败:', err);
   }
@@ -43,6 +40,14 @@ window.onload = () => {
   loadKnowledgePoints(subCourseId);
 };
 
-function uploadSubCourseKnowledge(subCourseId) {
-  window.open(`tob/c_uploadknowledge.html?subCourseId=${subCourseId}`, '_blank');
+function bindEventListeners(subCourseId) {
+  if (currentUser.admin) {
+    const uploadKnowledgeBox = document.getElementById('upload-knowledge-box');
+    uploadKnowledgeBox.innerHTML = `
+      <div class="upload-information" data-subcourse-id="${subCourseId}">添加知识点</div>`;
+
+    uploadKnowledgeBox.addEventListener('click', () => {
+      window.open(`tob/c_uploadknowledge.html?subCourseId=${subCourseId}`, '_blank');
+    });
+  }
 }

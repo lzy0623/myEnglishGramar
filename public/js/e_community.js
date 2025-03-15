@@ -1,33 +1,31 @@
+import { config } from '../../config.js';
+
 let likedIds = [];//记录点赞的题目id用来加载
 let isType = false;//选择题目类型进行题目加载的标识符
 let correctQeuestionIds = [];//记录已经做题并且正确的题目id下次就不在加载
-// 加载全部讨论题目
+// 加载讨论题目
 async function loadDiscussionQuestions(questionType) {
   try {
     const contentContainer = document.getElementById('discussion-box');
     const userId = getCurrentUser().id;
-    //获取所有题目信息
-    const response = await fetch(`http://localhost:3000/api/discussion/get/${questionType}/questions`);
+    const response = await fetch(`${config.API_BASE_URL}/api/discussion/get/${questionType}/questions`);
     const questions = await response.json();
-    console.log('题目信息', questions)
     if (!response.ok) {
       contentContainer.innerHTML = `<p>后端响应失败:${questions.error}</p>`;
       contentContainer.style.color = 'red';
       return;
     }
     // 获取当前登录用户的点赞状态
-    const likesResponse = await fetch(`http://localhost:3000/api/discussion/get/${userId}/user-likes`);
+    const likesResponse = await fetch(`${config.API_BASE_URL}/api/discussion/get/${userId}/user-likes`);
     const { likedQuestionIds } = await likesResponse.json();
     likedIds = likedQuestionIds;
 
     //获取用户的做题记录
-    const community = 'community'
-    const correctResponse = await fetch(`http://localhost:3000/api/user/get/${community}/${userId}/progress`);
+    const type = 'community'
+    const correctResponse = await fetch(`${config.API_BASE_URL}/api/user/get/${type}/${userId}/progress`);
     const correctQuestionIds = await correctResponse.json();
     const correctQuestionIdsArray = correctQuestionIds.data.map(id => parseInt(id, 10));
-    console.log('做题记录', correctQuestionIdsArray, typeof correctQuestionIdsArray)
     const filteredQuestions = questions.filter(question => !correctQuestionIdsArray.includes(question.id))
-    console.log('筛选后题目', filteredQuestions)
 
     contentContainer.innerHTML = filteredQuestions.map(question => `
       <div class="discussion-card">
@@ -42,24 +40,25 @@ async function loadDiscussionQuestions(questionType) {
         <div class="discussion-content">
           ${question.question}
         </div>
+
         <div class="discussion-options" id="${question.id}">
           ${question.options.map((option, optionIndex) => `
-            <div class="option" data-option="${String.fromCharCode(65 + optionIndex)}" onclick="selectOption('${question.correct_answer}', '${String.fromCharCode(65 + optionIndex)}','${question.id}',event)">
-            <span>${String.fromCharCode(65 + optionIndex)}.</span>
-            ${option}<span class="optionHint"></span>
+            <div class="option" data-option="${String.fromCharCode(65 + optionIndex)}" data-correct-answer="${question.correct_answer}">
+            ${option}
+            <span class="optionHint"></span>
             </div>`).join('')}
         </div>
 
-        <div class="discussion-footer">
-          <div onclick="toggleAnswer(${question.id})">
+        <div class="discussion-footer" data-question-id="${question.id}">
+          <div class="analysisBtn">
             <img src="images/icon/check_answer.png" class="checkimg"> 
             <span>解析</span>
           </div>
-          <div onclick="toggleLike(${question.id})">
-            <img src="${likedQuestionIds.includes(question.id) ? 'images/icon/like_have.png' : 'images/icon/like_not.png'}" id="like-icon-${question.id}">
+          <div class="likeBtn">
+            <img id="like-icon-${question.id}" src="${likedQuestionIds.includes(question.id) ? 'images/icon/like_have.png' : 'images/icon/like_not.png'}">
             <span id="like-count-${question.id}"></span>
           </div>
-          <div onclick="toggleComments(${question.id})">
+          <div class="commentBtn">
             <img src="images/icon/comment.png">
             <span id="comment-count-${question.id}"></span>
           </div>
@@ -75,6 +74,8 @@ async function loadDiscussionQuestions(questionType) {
       loadLikes(question.id);
       loadCommentCount(question.id);
     });
+
+    bindEventListeners();
   } catch (err) {
     document.getElementById('discussion-box').innerHTML = '<p>前端请求练习题失败</p>';
     document.getElementById('discussion-box').style.color = 'red';
@@ -84,7 +85,7 @@ async function loadDiscussionQuestions(questionType) {
 // 加载点赞数
 async function loadLikes(questionId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/discussion/get/${questionId}/likes-count`);
+    const response = await fetch(`${config.API_BASE_URL}/api/discussion/get/${questionId}/likes-count`);
     const { count } = await response.json();
     document.getElementById(`like-count-${questionId}`).textContent = count;
   } catch (err) {
@@ -94,24 +95,19 @@ async function loadLikes(questionId) {
 // 加载评论数
 async function loadCommentCount(questionId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/discussion/get/${questionId}/comment-count`);
+    const response = await fetch(`${config.API_BASE_URL}/api/discussion/get/${questionId}/comment-count`);
     const { count } = await response.json();
     document.getElementById(`comment-count-${questionId}`).textContent = count;
   } catch (err) {
     console.error('加载评论数失败:', err);
   }
 }
-// 显示/隐藏答案
-function toggleAnswer(questionId) {
-  const answerDiv = document.getElementById(`answer-${questionId}`);
-  answerDiv.style.display = answerDiv.style.display === 'none' ? 'block' : 'none';
-}
 // 点赞/取消点赞
 async function toggleLike(questionId) {
   try {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'))
     const userId = currentUser.id
-    const response = await fetch('http://localhost:3000/api/discussion/liked', {
+    const response = await fetch(`${config.API_BASE_URL}/api/discussion/liked`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, questionId })
@@ -133,20 +129,14 @@ function toggleComments(questionId) {
   let incorrectOption = questionDiv.querySelector('.option.incorrect')
   let correctAnswer = correctOption ? correctOption.getAttribute('data-option') : null;
   let incorrectAnswer = incorrectOption ? incorrectOption.getAttribute('data-option') : null;
-  const likedImgSrc = document.getElementById(`like-icon-${questionId}`).src
-  let isLiked = false
-  let likeCount = 0
-  if (likedImgSrc.includes('like_have.png')) {
-    isLiked = true
-  }
-  likeCount = document.getElementById(`like-count-${questionId}`).textContent
+  let isLiked = document.getElementById(`like-icon-${questionId}`).src.includes('like_have.png')
+  let likeCount = document.getElementById(`like-count-${questionId}`).textContent
   const url = `e_comment.html?questionId=${questionId}&isLiked=${isLiked}&likeCount=${likeCount}&correctAnswer=${correctAnswer}&incorrectAnswer=${incorrectAnswer}`;
   window.open(url, '_blank');
 }
 
 // 接收评论页面传递的信息
 async function receiveQuestionInfo(questionInfo) {
-  // 更新题目信息，例如用户的做题情况
   const questionId = questionInfo.questionId;
   const correctAnswer = questionInfo.correctAnswer;
   const incorrectAnswer = questionInfo.incorrectAnswer;
@@ -172,9 +162,9 @@ async function receiveQuestionInfo(questionInfo) {
   loadLikes(questionId);
   loadCommentCount(questionId);
 }
+
 //提交答案并且比对
 function selectOption(correctAnswer, selectedAnswer, questionId, event) {
-  //获取原来已经显示正确答案或错误答案的信息将其消除
   const options = event.target.parentElement.querySelectorAll('.option');
   options.forEach(option => {
     option.classList.remove('correct', 'incorrect');
@@ -195,35 +185,6 @@ function selectOption(correctAnswer, selectedAnswer, questionId, event) {
       correctQeuestionIds.splice(correctQeuestionIds.indexOf(questionId), 1)
     }
   }
-}
-
-//保存用户答题记录
-async function saveQuestionRecords() {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
-  if (correctQeuestionIds.length === 0) {
-    alert('请先答题')
-    return
-  }
-  const userId = currentUser.id
-  const community = 'community'
-  const response = await fetch(`http://localhost:3000/api/user/upload/${community}/progress`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      userId: userId,
-      data: correctQeuestionIds
-    })
-  })
-  const result = await response.json();
-  if (response.ok) {
-    alert('答题记录保存成功' + result.message)
-  } else {
-    alert('答题记录保存失败' + result.errorj)
-  }
-}
-//用户自上传讨论题目处理函数
-function uploadDiscussion() {
-  window.open('e_uploading.html', '_blank');
 }
 
 // 选择题目类型进行题目加载
@@ -250,6 +211,100 @@ function selectQuestionType(questionType) {
   loadDiscussionQuestions(questionType);
 }
 
+//保存用户答题记录
+async function saveQuestionRecords() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  if (correctQeuestionIds.length === 0) {
+    alert('请先答题')
+    return
+  }
+  const userId = currentUser.id
+  const type = 'community'
+  const response = await fetch(`${config.API_BASE_URL}/api/user/upload/${type}/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: userId,
+      data: correctQeuestionIds
+    })
+  })
+  const result = await response.json();
+  if (response.ok) {
+    alert('答题记录保存成功' + result.message)
+  } else {
+    alert('答题记录保存失败' + result.errorj)
+  }
+}
+
+//绑定事件监听器
+function bindEventListeners() {
+  const contentContainer = document.getElementById('discussion-box');
+
+  contentContainer.addEventListener('click', (event) => {
+    const target = event.target;
+
+    //点击答案选项事件
+    if (target.classList.contains('option')) {
+      console.log('评论页面')
+      const optionsBox = target.closest('.discussion-options');
+      const questionId = optionsBox.id
+      const correctAnswer = target.getAttribute('data-correct-answer');
+      const selectedAnswer = target.getAttribute('data-option');
+      selectOption(correctAnswer, selectedAnswer, questionId, event);
+      event.stopPropagation();
+    }
+
+    //显示隐藏答案
+    if (target.closest('.analysisBtn')) {
+      const btnBox = target.closest('.discussion-footer')
+      const questionId = btnBox.getAttribute('data-question-id');
+      const answerDiv = document.getElementById(`answer-${questionId}`);
+      answerDiv.style.display = answerDiv.style.display === 'none' ? 'block' : 'none';
+      event.stopPropagation();
+    }
+
+    //点赞取消点赞
+    if (target.closest('.likeBtn')) {
+      const btnBox = target.closest('.discussion-footer')
+      const questionId = btnBox.getAttribute('data-question-id');
+      toggleLike(questionId)
+      event.stopPropagation();
+    }
+
+    //进入评论
+    if (target.closest('.commentBtn')) {
+      const btnBox = target.closest('.discussion-footer')
+      const questionId = btnBox.getAttribute('data-question-id');
+      toggleComments(questionId)
+      event.stopPropagation();
+    }
+  });
+  try {
+    //选择题目类型进行加载
+    document.getElementById('selectQuestionType').addEventListener('change', (event) => {
+      event.preventDefault();
+      const type = event.target.value
+      selectQuestionType(type)
+      event.stopPropagation();
+    });
+
+    //上传讨论题目
+    document.getElementById('upload-question-btn').addEventListener('click', (event) => {
+      event.preventDefault();
+      window.open('e_uploading.html', '_blank');
+    });
+
+    //保存答题记录
+    document.getElementById('save-questions-btn').addEventListener('click', (event) => {
+      event.preventDefault();
+      saveQuestionRecords()
+    });
+  } catch (error) {
+  }
+}
+
 
 // 页面加载时调用
 window.onload = loadDiscussionQuestions('全部题目');
+window.receiveQuestionInfo = receiveQuestionInfo;
+window.bindEventListeners = bindEventListeners;

@@ -1,25 +1,30 @@
+import { config } from '../../config.js';
+
 document.addEventListener('DOMContentLoaded', () => {
+  const courseTitle = document.querySelector('.course-title');
   const videoPlayer = document.getElementById('videoPlayer');
   const videoSource = document.getElementById('videoSource');
-  const courseTitle = document.querySelector('.course-title');
   const submitCommentBtn = document.getElementById('submitComment');
+
   // 解析 URL 参数
   const courseDataString = new URLSearchParams(window.location.search).get('courseDAtaString');
   const courseData = JSON.parse(courseDataString);
   const user = JSON.parse(localStorage.getItem('currentUser'));
 
-  console.log(courseData);
   courseTitle.innerHTML = `<P>课程:${courseData.courseTitle}</P>`
-
   videoSource.src = `videos/${courseData.videoUrl}`;
-  videoPlayer.load(); // 重新加载视频源
+  videoPlayer.load();
 
+  submitCommentBtn.addEventListener('click', submitComment);
   // 评论功能
   async function submitComment() {
     const commentContent = document.getElementById('comment-content').value.trim();
-    if (!commentContent) return;
+    if (!commentContent) {
+      alert('评论内容不能为空');
+      return;
+    }
     try {
-      const response = await fetch('http://localhost:3000/api/course/video/upload/comment', {
+      const response = await fetch(`${config.API_BASE_URL}/api/course/video/upload/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -28,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
           content: commentContent
         })
       });
-      const result = await response.json();
 
+      const result = await response.json();
       if (response.ok) {
         alert(result.message);
         loadComments();
@@ -37,13 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(result.error || '评论失败');
       }
     } catch (err) {
-      alert('评论失败,可能网络未连接或未登录');
+      alert('评论请求失败');
     }
   }
-
   async function loadComments() {
     try {
-      const response = await fetch(`http://localhost:3000/api/course/video/get/comment`, {
+      const response = await fetch(`${config.API_BASE_URL}/api/course/video/get/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId: courseData.courseId })
@@ -67,5 +71,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   loadComments();
-  submitCommentBtn.addEventListener('click', submitComment);
 });

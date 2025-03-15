@@ -1,10 +1,11 @@
+import { config } from '../../config.js';
 // 获取每日一句
 async function loadDailySentence(selectDate) {
   if (!selectDate) {
     selectDate = new Date().toISOString().split('T')[0];
   }
   try {
-    const response = await fetch(`http://localhost:3000/api/get/${selectDate}/sentence`);
+    const response = await fetch(`${config.API_BASE_URL}/api/get/${selectDate}/sentence`);
     const result = await response.json();
     if (response.ok) {
       // 更新日期
@@ -49,6 +50,34 @@ function generateDateOptions() {
     dateSelector.appendChild(option);
   });
 }
+
+// 页面加载时调用
+window.onload = function () {
+  loadDailySentence();
+  generateDateOptions(); // 生成日期选项
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+  if (!getCurrentUser()) {
+    const loginCard = document.getElementById('login-card');
+    loginCard.classList.remove('hidden')
+    loginCard.innerHTML = `<a href="a_login.html"><img src="images/index_login.jpeg"></a>`;
+  }
+  if (getCurrentUser().admin) {
+    document.getElementById('upload-information-box').innerHTML = `
+    <div class="upload-information" id="uploadSentence">添加每日一句</div>`;
+  }
+  document.getElementById('selectDate').addEventListener('change', getSentenceByDate);
+  document.getElementById('uploadSentence').addEventListener('click', uploadSentence);
+});
+
+//-----------------------------管理员功能-------------------------------
+
+//点击上传按钮跳转到上传每日一句界面
+function uploadSentence() {
+  window.open('tob/b_uploadsentence.html', '_blank');
+}
+
 //控制动态变化
 const sentenceBox = document.querySelector('.daily-sentence')
 const imgBox = document.querySelector('.daily-sentence>img');
@@ -69,29 +98,4 @@ sentenceBox.addEventListener('mouseleave', function () {
   translationBox.style.width = '460px'
   actionsBox.style.width = '460px'
 })
-
-
-// 页面加载时调用
-window.onload = function () {
-  loadDailySentence();
-  generateDateOptions(); // 生成日期选项
-};
-
-
-//-----------------------------管理员功能-------------------------------
-const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-if (!currentUser) {
-  const loginCard = document.getElementById('login-card');
-  loginCard.classList.remove('hidden')
-  loginCard.innerHTML = `<a href="a_login.html"><img src="images/index_login.jpeg"></a>`;
-}
-if (currentUser.admin) {
-  document.getElementById('upload-information-box').innerHTML = `
-  <div class="upload-information" onclick="uploadSentence()">添加每日一句</div>`;
-}
-// 管理员功能点击上传按钮跳转到上传每日一句界面
-function uploadSentence() {
-  window.open('tob/b_uploadsentence.html', '_blank');
-}
-
 
