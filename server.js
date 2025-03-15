@@ -1,10 +1,18 @@
-import {dbConfig} from './config.js'
+import { dbConfig } from './config.js'// 引入数据库配置文件
+import express from 'express'// 引入Express框架，用于创建web服务器
+import cors from 'cors';// 引入CORS中间件，用于处理跨域请求
+import mysql from 'mysql2/promise';// 引入MySQL2的Promise实现，用于数据库操作
 
+//图片视频文件处理
+import multer from 'multer'; //处理文件上传
+import path from 'path';//处理文件路径
+import fs from 'fs';
+import timeLog from 'console';
+import { title, resourceUsage } from 'process';
 
-const express = require('express');// 引入Express框架，用于创建web服务器
-const cors = require('cors');// 引入CORS中间件，用于处理跨域请求
-const mysql = require('mysql2/promise');// 引入MySQL2的Promise实现，用于数据库操作
 const app = express();// 创建Express应用实例
+app.use(express.json()); // 解析JSON请求体
+app.use(cors()); // 允许跨域
 
 // 数据库配置
 const pool = mysql.createPool({
@@ -15,20 +23,6 @@ const pool = mysql.createPool({
   waitForConnections: true,//是否等待连接
   connectionLimit: 10//最大连接数
 });
-
-
-// 中间件
-app.use(express.json()); // 解析JSON请求体
-app.use(cors()); // 允许跨域
-
-//图片视频文件处理
-const multer = require('multer'); //处理文件上传
-const path = require('path');//处理文件路径
-const fs = require('fs');
-const { timeLog } = require('console');
-const { type } = require('os');
-const { title, resourceUsage } = require('process');
-
 
 
 
