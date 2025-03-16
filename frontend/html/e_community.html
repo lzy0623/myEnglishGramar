@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>语法在线 - 社区讨论</title>
+  <link rel="stylesheet" href="../css/navigation.css">
+  <link rel="stylesheet" href="../css/e_community.css">
+  <script type="module" src="../js/navigation.js"></script>
+</head>
+
+<body>
+  <header>
+  </header>
+
+  <div class="main-container">
+    <div class="content-wrapper">
+      <!-- 选择与上传 -->
+      <div class="filter-bar">
+        <div>
+          <p id="isTips"></p>
+          <select id="selectQuestionType">
+            <option>全部题目</option>
+            <option>句子成分</option>
+            <option>十大词性</option>
+            <!-- 其他选项 -->
+          </select>
+        </div>
+        <div>
+          <button class="upload-btn" id="upload-question-btn">上传题目讨论 +</button>
+        </div>
+        <div>
+          <button class="save-btn" id="save-questions-btn">保存做题记录</button>
+        </div>
+      </div>
+
+      <div id="discussion-box">
+      </div>
+
+    </div>
+    <script type="module" src="../js/e_community.js"></script>
+</body>
+
+</html>

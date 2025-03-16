@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>B端上传子课程</title>
+  <link rel="stylesheet" href="tob_navigation.css">
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="content-wrapper">
+      <div class="box">
+        <form onsubmit="submitSubCourse(event)">
+          <div class="form-group">
+            <label for="subCourseName">子课程名称</label>
+            <input type="text" id="subCourseName" placeholder="输入子课程名称(必填)" required>
+          </div>
+          <div class="form-group">
+            <label for="description">子课程描述</label>
+            <input type="text" id="description" placeholder="输入子课程描述(必填)" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn">取消上传</button>
+            <button type="submit" class="submit-btn">上传</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+  <script>
+    const courseId = new URLSearchParams(window.location.search).get('courseId');
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const userId = currentUser.id;
+    const userName = currentUser.username;
+    async function submitSubCourse(event) {
+      event.preventDefault();
+      // 获取表单数据
+      const subCourseName = document.getElementById('subCourseName').value.trim();
+      const subCourseDescription = document.getElementById('description').value.trim();
+      // 表单验证
+      if (!courseId || !subCourseName || !subCourseDescription) {
+        alert('请填写所有必填项');
+        return;
+      }
+      try {
+        // 提交数据到后端
+        const response = await fetch(`http://localhost:3000/api/upload/courses/${courseId}/sub-course`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: subCourseName,
+            description: subCourseDescription,
+            userId: userId,
+            userName: userName
+          })
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message + `ID: ${result.id}`);
+          document.querySelector('form').reset();
+        } else {
+          alert(`上传失败: ${result.error}`);
+        }
+      } catch (err) {
+        alert(`上传失败: ${err.message}`);
+      }
+    }
+    // 取消按钮处理
+    document.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.querySelector('form').reset();
+      window.close();
+    });
+  </script>
+</body>
+
+</html>

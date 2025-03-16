@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>语法在线 - 社区讨论</title>
+  <link rel="stylesheet" href="../css/navigation.css">
+  <link rel="stylesheet" href="../css/e_community.css">
+  <style>
+    body {
+      padding-top: 0;
+    }
+
+    .filter-bar {
+      top: 0;
+    }
+
+    .action-btn {
+      display: flex;
+      justify-content: center;
+      text-align: center;
+      letter-spacing: 2px;
+      width: 100%;
+      padding: 10px 0px;
+      border-radius: 6px;
+      border: 1px solid rgb(216, 225, 236);
+      background-color: rgb(255, 255, 255);
+      cursor: pointer;
+      transition: box-shadow 0.3s ease, transform 0.3s ease, border 0.3s ease, background-color 0.3s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+      border: 1px solid rgba(42, 130, 228, 1);
+      background-color: rgba(42, 130, 228, 0.1);
+      box-shadow: 0px 14px 8px -10px rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn.clicked {
+      transform: translateY(-1px);
+      background: rgba(121, 72, 234, 0.1);
+      border: 1px solid rgba(121, 72, 234, 1);
+      box-shadow: 0px 14px 8px -10px rgba(0, 0, 0, 0.1);
+    }
+
+    .commentBox {
+      color: rgba(56, 56, 56, 1);
+      padding: 10px 0px;
+    }
+
+    .commentBox p {
+      padding: 10px;
+      background-color: rgba(121, 72, 234, 0.04);
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    .commentBox span {
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <div class="content-wrapper">
+      <!-- 选择与上传 -->
+      <div class="filter-bar">
+        <div>
+          <button class="action-btn" id="likedQuestions">点赞
+            <img src="../icon/like_not.png">
+          </button>
+        </div>
+        <div>
+          <button class="action-btn" id="commentedQuestions">评论
+            <img src="../icon/comment.png">
+          </button>
+        </div>
+        <div>
+          <button class="action-btn" id="userQuestions">我的上传
+            <img src="../icon/check_answer.png">
+          </button>
+        </div>
+      </div>
+
+      <div id="discussion-box">
+      </div>
+
+    </div>
+    <script type="module" src="../js/f_manageCommunity.js"></script>
+</body>
+
+</html>

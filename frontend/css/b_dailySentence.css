@@ -1,0 +1,191 @@
+.box {
+  display: flex;
+  margin: 20px auto;
+  border-radius: 6px;
+  padding: 30px;
+  box-shadow: 0 2px 4px rgba(121, 72, 234, 0.1),
+    0 -2px 4px rgba(121, 72, 234, 0.1);
+}
+
+.daily-sentence {
+  display: flex;
+  flex-direction: column;
+  width: 550px;
+}
+
+.daily-sentence img {
+  margin-top: 6px;
+  width: 460px;
+  height: 180px;
+  border-radius: 8px;
+  cursor: pointer;
+  /* 添加过渡效果 */
+  transition: width 0.3s ease, height 0.3s ease;
+}
+.daily-sentence img:hover {
+  width: 500px;
+  height: 200px;
+}
+
+.daily-sentence p {
+  width: 500px;
+  transition: width 0.5s ease;
+}
+
+.daily-sentence .date {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -20px;
+  align-items: flex-end;
+  color: rgba(42, 130, 228, 1) !important;
+}
+
+.daily-sentence .date .dateday {
+  font-size: 30px;
+  width: auto !important;
+}
+
+.daily-sentence .date .datemoon {
+  font-size: 26px;
+  width: auto !important;
+  margin-left: 10px;
+  margin-bottom: 2px;
+}
+
+.daily-sentence .english {
+  margin-top: 20px;
+  color: rgba(64, 64, 64, 1);
+  font-size: 22px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+.daily-sentence .translation {
+  color: rgba(128, 128, 128, 1);
+  font-size: 16px;
+  letter-spacing: 2px;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  height: 0px;
+  opacity: 0;
+  transition: height 0.5s ease-in-out, opacity 0.5s ease;
+}
+
+.daily-sentence .translation.show {
+  opacity: 1;
+  height: 50px;
+}
+
+.hidden {
+  margin-top: 10px;
+  visibility: hidden;
+  display: none;
+}
+
+.actions {
+  position: relative;
+  width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #666;
+  font-size: 14px;
+  transition: width 0.3s ease;
+}
+
+
+.actions .tool {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 70px;
+  height: 30px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.actions .tool:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.actions .tool img {
+  border-radius: 0px !important;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  background-color: transparent;
+  margin-top: 2px;
+}
+
+.actions select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* 去掉默认的下拉箭头 */
+  border: none;
+  /* 去掉边框 */
+  background: none;
+  /* 去掉背景 */
+  cursor: pointer;
+  /* 设置鼠标样式 */
+  padding: 10px 20px;
+  background: url('../icon/all.png') no-repeat left center;
+  background-size: 16px 16px;
+  /* 设置背景图片大小 */
+  background-position: left 0px center;
+  /* 将背景图片向右移动10px */
+  margin-right: -20px;
+}
+
+.actions select:focus {
+  outline: none;
+}
+
+.actions select option {
+  padding: 10px 0px;
+}
+
+
+.cross-line {
+  width: 500px;
+  height: 1px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+  background-color: rgb(211, 211, 211, 1);
+}
+
+.sidebar {
+  height: 380px;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 0.5fr);
+  /* 行间距 */
+  row-gap: 0px;
+  /* 列间距*/
+  column-gap: 10px;
+  justify-items: center;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.sidebar .card {
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  width: 140px;
+  height: 140px;
+  cursor: pointer;
+}
+
+.sidebar img {
+  width: 100%;
+  border-radius: 8px;
+  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sidebar img:hover {
+  width: 105%;
+}

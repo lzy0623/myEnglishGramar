@@ -1,0 +1,116 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f0f2f5;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.box {
+  background-color: rgb(255, 255, 255);
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px 0px rgba(42, 130, 228, 0.4);
+  text-align: center;
+  width: 320px;
+}
+
+.box h2 {
+  font-size: 28px;
+  color: rgba(29, 29, 29, 1);
+}
+
+.box p {
+  margin-top: -10px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: rgba(56, 56, 56, 1);
+}
+
+.box .input-group {
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.box .input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(42, 130, 228, 1);
+}
+
+.box .input-group input {
+  width: 94%;
+  height: 22px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.box .input-group input:focus {
+  border: 1px solid rgba(42, 130, 228, 1);
+  outline: none;
+}
+
+.box .login-options {
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.box .forgot-password {
+  color: rgba(42, 130, 228, 1);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.box .submitBtn {
+  background-color: rgba(42, 130, 228, 1);
+  color: white;
+  border: none;
+  padding: 14px 0;
+  width: 100%;
+  border-radius: 40px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.submitBtn:hover {
+  background-color: rgba(121, 72, 234, 1);
+  box-shadow: 0 8px 16px rgba(42, 130, 228, 0.2);
+}
+
+.box .link {
+  margin-top: 30px;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.box .link a {
+  color: rgba(42, 130, 228, 1);
+  text-decoration: none;
+}
+
+
+.terms {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  margin-top: -6px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #555555;
+}

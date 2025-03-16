@@ -1,0 +1,146 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /*按照优先级顺序排列字体*/
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f0f2f5;
+  /*确保页面内容的高度至少占据整个视口的高度（vh表示视口高度）
+    防止页面内容过少时，背景色无法覆盖整个屏幕*/
+  min-height: 100vh;
+  /* 确保内容不会被固定的导航栏遮挡 */
+}
+
+/* 主容器样式*/
+.main-container {
+  padding: 10px;
+}
+
+/* 页面背景 */
+.content-wrapper {
+  max-width: 1000px;
+  /*确保页面框架居中*/
+  margin: 10px auto;
+  padding: 30px;
+  background: rgb(255, 255, 255);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/*内容样式 */
+.box {
+  padding: 30px;
+  padding: 60px 40px 100px 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+    0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 30px;
+  display: flex;
+}
+
+.form-group label {
+  width: 100px;
+  /* 使用块级元素 */
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  color: #333;
+  text-align: left;
+}
+
+.form-group input,
+.form-group select {
+  width: 40%;
+  height: 50px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.form-group textarea {
+  line-height: 26px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 18px;
+  font-weight: 560;
+}
+
+.form-group #features-title {
+  width: 600px;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.form-group input {
+  width: 90%;
+  transition: border-color 0.3s ease-in-out;
+}
+
+.form-group input:focus {
+  outline: none;
+  border: 1px solid rgba(42, 130, 228, 1);
+}
+
+.form-group select option {
+  font-size: 14px;
+}
+
+.form-group #imagePreview {
+  background-color: #4f46e5;
+}
+
+.form-group #previewImage {
+  width: 500px;
+}
+
+input[name="correctAnswer"] {
+  /* 样式规则 */
+  width: 24px;
+  margin-left: 30px;
+}
+
+.form-actions {
+  margin-top: 70px;
+  display: flex;
+  justify-content: left;
+  gap: 140px;
+}
+
+.cancel-btn,
+.submit-btn {
+  width: 160px;
+  height: 40px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.cancel-btn {
+  color: rgba(18, 18, 18, 1);
+}
+
+.submit-btn {
+  color: rgba(255, 255, 255, 1);
+  background-color: rgba(42, 130, 228, 1);
+}
+
+.submit-btn:hover {
+  background-color: #4f46e5;
+}
+
+.cancel-btn:hover {
+  background-color: #e4e4e4;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>用户注册</title>
+  <link rel="stylesheet" href="../css/a_login.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="box">
+      <h2>创建账户</h2>
+      <p>开启语法学习路</p>
+      <form id="register-form">
+        <div class="input-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" placeholder="请输入用户名/电话" required>
+        </div>
+        <div class="input-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required>
+        </div>
+        <div class="input-group">
+          <label for="confirm-password">确认密码</label>
+          <input type="password" id="confirm-password" placeholder="请再次输入密码" required>
+        </div>
+        <div class="terms">
+          <input type="checkbox" id="terms">
+          <label for="terms">我已阅读并同意 <a href="#">服务条款</a> 和 <a href="#">隐私政策</a></label>
+        </div>
+        <button type="submit" class="submitBtn">立即注册</button>
+      </form>
+      <div class="link">
+        <p>已有账号?<a href="a_login.html">立即登录</a></p>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="../js/a_login.js"></script>
+</body>
+
+
+</html>

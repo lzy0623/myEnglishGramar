@@ -1,18 +1,22 @@
-import { dbConfig } from './config.js'// 引入数据库配置文件
+import { dbConfig, uploadResourcesConfig } from './backend/config.js'// 引入数据库配置文件
+
 import express from 'express'// 引入Express框架，用于创建web服务器
 import cors from 'cors';// 引入CORS中间件，用于处理跨域请求
 import mysql from 'mysql2/promise';// 引入MySQL2的Promise实现，用于数据库操作
 
-//图片视频文件处理
-import multer from 'multer'; //处理文件上传
+import multer from 'multer'; //处理文件上传//图片视频文件处理
+import { fileURLToPath } from 'url';
 import path from 'path';//处理文件路径
-import fs from 'fs';
-import timeLog from 'console';
-import { title, resourceUsage } from 'process';
+import fs from 'fs';//处理文件
+import { title } from 'process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();// 创建Express应用实例
 app.use(express.json()); // 解析JSON请求体
 app.use(cors()); // 允许跨域
+
 
 // 数据库配置
 const pool = mysql.createPool({
@@ -117,7 +121,7 @@ app.post('/api/user/forgot-password', async (req, res) => {
 app.get('/api/user/:userId/current-user', async (req, res) => {
   const { userId } = req.params
   if (!userId) {
-    return res.status(400).json({ error: '用户名为空,请先登录' });
+    return res.status(400).json({ error: '用户不存在,请先登录' });
   }
   try {
     const [users] = await pool.query('SELECT * FROM users WHERE id = ? LIMIT 1', [userId]);
@@ -148,14 +152,16 @@ app.get('/api/user/:userId/current-user', async (req, res) => {
 
 //1---------------------------------每日一句模块api----------------------------------
 //配置multer图片存储
+
 const imgstorage = multer.diskStorage({
   destination: (req, file, cb) => {
     // 指定文件存储的目录，使用 path 模块拼接目录路径
-    cb(null, path.join(__dirname, 'public/images/imgsentences'));
+    cb(null, path.join(__dirname, uploadResourcesConfig.IMG_SENTENCE_PATH));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);// 获取文件扩展名
-    const destination = path.join(__dirname, 'public/images/imgsentences', file.originalname);
+    const destination = path.join(__dirname, uploadResourcesConfig.IMG_SENTENCE_PATH, file.originalname);
+    console.log('拼接文件名', destination);
     // 检查文件是否存在
     fs.access(destination, fs.constants.F_OK, (err) => {
       if (err) {
@@ -232,11 +238,12 @@ app.post('/api/upload/sentence', upload.single('image'), async (req, res) => {
 
 
 
+
 //2------------------------------------语法课程api-----------------------------------------
 //视频上传配置 
 const videoStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'public/videos')); // 视频存储目录
+    cb(null, path.join(__dirname, uploadResourcesConfig.VIDEO_COURSE_PATH)); // 视频存储目录
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -297,7 +304,6 @@ app.post('/api/upload/course', videoUpload.single('video'), async (req, res) => 
   }
 });
 
-
 //2-2.1获取某个主课程的子课程
 app.get('/api/get/courses/:courseId/sub-courses', async (req, res) => {
   const { courseId } = req.params;
@@ -312,7 +318,7 @@ app.get('/api/get/courses/:courseId/sub-courses', async (req, res) => {
   }
 });
 
-//2-2.2加上传某个主课程的子课程
+//2-2.2上传某个主课程的子课程
 app.post('/api/upload/courses/:courseId/sub-course', async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -362,7 +368,7 @@ app.get('/api/get/sub-courses/:subCourseId/knowledge', async (req, res) => {
   }
 });
 
-// 2-3-1 添加上传某个子课程的知识点
+// 2-3.2 添加上传某个子课程的知识点
 app.post('/api/upload/sub-courses/:subCourseId/knowledge', async (req, res) => {
   const { subCourseId } = req.params;
   try {
@@ -397,6 +403,12 @@ app.get('/api/get/sub-courses/:subCourseId/exercises', async (req, res) => {
   try {
     const [subCourseTitle] = await pool.query('SELECT title FROM sub_courses WHERE id = ? LIMIT 1', [subCourseId]);
     const [exercises] = await pool.query('SELECT * FROM subcourse_exercises WHERE sub_course_id = ?', [subCourseId]);
+    if (exercises.length === 0) {
+      return res.json({
+        title: subCourseTitle[0].title,
+        exercises: []
+      });
+    }
     res.json({
       title: subCourseTitle[0].title,
       exercises: exercises
@@ -443,6 +455,7 @@ app.post('/api/course/video/:type/comment', async (req, res) => {
       );
       res.status(201).json({ message: '评论成功' });
     }
+    
     else if (type == 'get') {
       const { courseId } = req.body;
       const [comments] = await pool.query(
@@ -472,7 +485,6 @@ app.post('/api/course/video/:type/comment', async (req, res) => {
 app.get('/api/get/:date/articles/:level', async (req, res) => {
   const { date, level } = req.params;
   try {
-    //数组解构赋值：articles 实际上是查询结果中的 rows 部分，即符合查询条件的所有文章记录。
     const [articles] = await pool.query('SELECT * FROM articles WHERE date = ? AND difficulty = ? LIMIT 1', [date, level]);
     if (articles.length === 0) {
       res.status(404).json({ error: `${level}难度短文不存在或未上传` });
@@ -532,6 +544,7 @@ app.get('/api/discussion/get/:type/questions', async (req, res) => {
         ORDER BY dq.created_at DESC
     `);
       return res.json(questions);
+
     } else if (type) {
       const [questions] = await pool.query(`
         SELECT dq.*, u.nickname AS author, u.avatar AS avatar
@@ -594,7 +607,7 @@ app.get('/api/discussion/get/:questionId/question', async (req, res) => {
   }
 })
 
-// 4-5获取某个题目的评论
+// 4-5.1获取某个题目的评论
 app.get('/api/discussion/get/:questionId/comments', async (req, res) => {
   const { questionId } = req.params;
   try {
@@ -611,7 +624,7 @@ app.get('/api/discussion/get/:questionId/comments', async (req, res) => {
   }
 });
 
-// 4-5.1提交某个题目的评论
+// 4-5.2提交某个题目的评论
 app.post('/api/discussion/upload/:questionId/comment', async (req, res) => {
   const questionId = req.params.questionId;
   const { userId, content } = req.body;
@@ -645,7 +658,7 @@ app.post('/api/discussion/upload/question', async (req, res) => {
   }
 });
 
-// 点赞或取消点赞
+//4-6 点赞或取消点赞
 app.post('/api/discussion/liked', async (req, res) => {
   const { userId, questionId } = req.body;
   try {
@@ -676,7 +689,7 @@ app.post('/api/discussion/liked', async (req, res) => {
   }
 });
 
-// 获取某位用户的点赞状态
+//4-7获取某位用户的点赞状态
 app.get('/api/discussion/get/:userId/user-likes', async (req, res) => {
   const { userId } = req.params;
   try {
@@ -780,7 +793,7 @@ app.get('/api/userinfo/get/:userId/:type/discussion-data', async (req, res) => {
 // 配置multer图片存储
 const avatarStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, 'public/images/imgavatars'));
+    cb(null, path.join(__dirname, uploadResourcesConfig.IMG_AVATAR_PATH));
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -823,6 +836,7 @@ app.post('/api/userinfo/update-info', avatarUpload.single('avatar'), async (req,
     res.status(500).json({ error: '服务器错误', details: err.message });
   }
 });
+
 //5-3开通会员
 app.post('/api/userinfo/update-vip', async (req, res) => {
   const { userId, isVip } = req.body;
@@ -869,7 +883,6 @@ app.post('/api/user/upload/:type/progress', async (req, res) => {
         }
       case 'exercise':
         const { subCourseId } = req.body
-        console.log('6-1subCourseId:', subCourseId)
         const [resultExercise] = await pool.query(`SELECT course_question FROM user_progress_exercise WHERE user_id = ? AND subcourse_id= ? LIMIT 1`, [userId, subCourseId])
         if (resultExercise.length === 0) {
           const dataString = JSON.stringify(data)

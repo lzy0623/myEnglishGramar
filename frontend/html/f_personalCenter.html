@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <title>语法在线-个人中心</title>
+  <link rel="stylesheet" href="../css/navigation.css">
+  <link rel="stylesheet" href="../css/f_personalCenter.css">
+  <script type="module" src="../js/navigation.js"></script>
+</head>
+
+<body>
+  <header>
+  </header>
+  <div class="main-container">
+    <div class="content-wrapper">
+      <div class="box">
+
+        <div class="user-info">
+          <img src="" class="avatar" id="showInfoModal">
+          <div class="user-details">
+            <h2>我的昵称</h2>
+            <img src="../icon/VIP_no.png" alt="VIP" class="img-vip" id="openVipModal">
+            <span class="register-date">2025年01月15日注册</span>
+          </div>
+        </div>
+
+        <div class="framebox">
+          <h3>学习进度</h3>
+          <div class="content-box">
+            <div class="itembox">
+              <p class="value"><span>30</span>%</p>
+              <p class="label">语法学习进度</p>
+            </div>
+            <div class="itembox">
+              <p class="value"><span>20</span> 篇</p>
+              <p class="label">短文阅读量</p>
+            </div>
+            <div class="itembox">
+              <p class="value" id="level"><span>学者</span></p>
+              <p class="label">当前身份</p>
+            </div>
+          </div>
+        </div>
+        <div class="framebox">
+          <h3>社区管理</h3>
+          <div class="content-box community">
+            <div class="itembox">
+              <p class="value" id="likedCount"><span>20</span></p>
+              <p class="label">我的点赞</p>
+            </div>
+            <div class="itembox">
+              <p class="value" id="commentCount"><span>10</span></p>
+              <p class="label">我的评论</p>
+            </div>
+            <div class="itembox">
+              <p class="value" id="questionCount"><span>05</span></p>
+              <p class="label">我的上传</p>
+            </div>
+          </div>
+        </div>
+        <!-- 信息修改弹窗 -->
+        <div class="modal" id="infoModal">
+          <div class="modal-content">
+            <div><span class="close" id="closeModal">&times;</span></div>
+            <h3>修改个人信息</h3>
+            <!-- 头像上传 -->
+            <div class="form-group">
+              <div class="avatar-upload">
+                <div><img src="" id="previewAvatar" class="avatar-preview"></div>
+                <div> <input type="file" id="avatarInput" name="avatar" accept="image/*"></div>
+              </div>
+            </div>
+            <!-- 昵称修改 -->
+            <div class="form-group">
+              <label>昵称</label>
+              <input type="text" id="nicknameInput" maxlength="20">
+            </div>
+            <button class="confirm-btn" id="submitUserInfo">确认修改</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="../js/f_personalCenter.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,246 @@
+.filter-bar {
+  margin: 0px auto 30px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  width: 96%;
+  border-radius: 8px;
+  position: sticky;
+  top: 64px;
+  z-index: 999;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0px 4px 2px 1px rgba(0, 0, 0, 0.2),
+    0px -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.filter-bar div {
+  width: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.filter-bar div #isTips {
+  color: rgba(42, 130, 228, 1);
+  font-size: 10px;
+  letter-spacing: 1px;
+  border-radius: 6px;
+  top: 63%;
+  left: 22%;
+  position: absolute;
+  z-index: 1;
+}
+
+.filter-bar select,
+.filter-bar .upload-btn,
+.filter-bar .save-btn {
+  text-align: center;
+  letter-spacing: 1px;
+  width: 100%;
+  padding: 10px 0px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.filter-bar select {
+  border: 1px solid rgba(42, 130, 228, 1);
+  background-color: rgba(42, 130, 228, 0.1);
+}
+
+option {
+  padding: 10px;
+}
+
+.filter-bar .upload-btn {
+  background: rgba(121, 72, 234, 0.1);
+  border: 1px solid rgba(121, 72, 234, 1);
+}
+
+.filter-bar .save-btn {
+  background: rgba(48, 212, 48, 0.1);
+  border: 1px solid rgba(48, 212, 48, 1);
+}
+
+.filter-bar select:hover {
+  transform: translateY(-1px);
+  box-shadow: 0px 14px 8px -10px rgba(42, 130, 228, 0.3);
+}
+
+.filter-bar .upload-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0px 14px 8px -10px rgba(121, 72, 234, 0.3);
+}
+
+.filter-bar .save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0px 14px 8px -10px rgba(48, 212, 48, 0.3);
+}
+
+
+
+.discussion-card {
+  margin: 0 auto;
+  width: 94%;
+  opacity: 1;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1),
+    0px -1px 2px rgba(0, 0, 0, 0.1);
+  padding: 20px 30px 12px 30px;
+  margin-bottom: 30px;
+}
+
+.discussion-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.headphoto {
+  width: 50px;
+  height: 50px;
+  opacity: 1;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: rgb(182, 182, 182);
+  background-color: antiquewhite;
+}
+
+.headphoto img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.discussion-header .author {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 22px;
+  color: rgba(68, 68, 68, 1);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.discussion-header span {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  line-height: 10px;
+  color: rgba(128, 128, 128, 1);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.discussion-content {
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0px;
+  line-height: 29px;
+  color: rgba(56, 56, 56, 1);
+  text-align: left;
+  vertical-align: middle;
+  margin-bottom: 14px;
+}
+
+.discussion-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.discussion-options div {
+  /* 文本 */
+  font-size: 20px;
+  font-weight: 450;
+  letter-spacing: 1px;
+  line-height: 28px;
+  color: rgba(36, 36, 36, 1);
+  text-align: left;
+  vertical-align: middle;
+  /* 框架 */
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  height: 50px;
+  opacity: 1;
+  border-radius: 8px;
+  background: rgba(42, 130, 228, 0.03);
+  border: 1px solid rgba(42, 130, 228, 0.6);
+  transition: transform 0.2s ease;
+  transform-origin: center;
+}
+
+.discussion-options div:hover {
+  transform: scale(1.01);
+  transform-origin: center;
+}
+
+.discussion-options .option .optionHint {
+  font-size: 14px;
+  margin-left: 20px;
+}
+
+.discussion-footer {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  gap: 100px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: rgba(56, 56, 56, 1);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.discussion-footer img {
+  width: 20px;
+  height: 20px;
+}
+
+.discussion-footer img.checkimg {
+  width: 16px;
+  height: 16px;
+}
+
+.discussion-footer div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.discussion-footer div:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2), 0 -1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.answer {
+  margin: 12px 0px 8px 0px;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 20px;
+  color: rgba(100, 100, 100, 1);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.option.correct {
+  background-color: rgba(48, 212, 48, 0.2);
+}
+
+.option.incorrect {
+  background-color: rgba(212, 48, 48, 0.2);
+}
