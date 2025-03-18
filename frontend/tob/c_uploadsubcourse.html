@@ -11,7 +11,7 @@
   <div class="main-container">
     <div class="content-wrapper">
       <div class="box">
-        <form onsubmit="submitSubCourse(event)">
+        <form id="submitSubCourse">
           <div class="form-group">
             <label for="subCourseName">子课程名称</label>
             <input type="text" id="subCourseName" placeholder="输入子课程名称(必填)" required>
@@ -30,13 +30,20 @@
 
     </div>
   </div>
-  <script>
+  <script type="module">
+    import { config } from '../../backend/config.js';
     const courseId = new URLSearchParams(window.location.search).get('courseId');
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const userId = currentUser.id;
-    const userName = currentUser.username;
-    async function submitSubCourse(event) {
-      event.preventDefault();
+    const subCourseId = new URLSearchParams(window.location.search).get('subCourseId');
+    const subCourseTitle = new URLSearchParams(window.location.search).get('subCourseTitle');
+    const subCourseDescription = new URLSearchParams(window.location.search).get('subCourseDescription');
+
+    if (subCourseId) {
+      document.getElementById('subCourseName').value = subCourseTitle;
+      document.getElementById('description').value = subCourseDescription;
+    }
+
+    document.getElementById('submitSubCourse').addEventListener('submit', async (e) => {
+      e.preventDefault();
       // 获取表单数据
       const subCourseName = document.getElementById('subCourseName').value.trim();
       const subCourseDescription = document.getElementById('description').value.trim();
@@ -46,31 +53,52 @@
         return;
       }
       try {
-        // 提交数据到后端
-        const response = await fetch(`http://localhost:3000/api/upload/courses/${courseId}/sub-course`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            title: subCourseName,
-            description: subCourseDescription,
-            userId: userId,
-            userName: userName
-          })
-        });
-        const result = await response.json();
-
-        if (response.ok) {
-          alert(result.message + `ID: ${result.id}`);
-          document.querySelector('form').reset();
-        } else {
-          alert(`上传失败: ${result.error}`);
+        // 更新编辑子课程
+        if (subCourseId) {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/update/sub-courses/${courseId}/${subCourseId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: subCourseName,
+              description: subCourseDescription,
+            })
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(`更新成功${result.message}`);
+          } else {
+            alert(`更新失败: ${result.error}`);
+          }
         }
+
+        // 新增子课程
+        else {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/upload/sub-courses/${courseId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: subCourseName,
+              description: subCourseDescription,
+            })
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(result.message + `ID: ${result.id}`);
+            document.querySelector('form').reset();
+          } else {
+            alert(`上传失败: ${result.error}`);
+          }
+        }
+
       } catch (err) {
         alert(`上传失败: ${err.message}`);
       }
-    }
+    });
+
     // 取消按钮处理
     document.querySelector('.cancel-btn').addEventListener('click', () => {
       document.querySelector('form').reset();

@@ -6,12 +6,13 @@ let exercisesTitle = '';// 存储练习题的标题
 let currentExerciseId = 0;// 存储当前练习题的 ID
 let userAnswers = [];//存储用户答题的答案信息
 const subCourseId = new URLSearchParams(window.location.search).get('subCourseId');
+const courseId = new URLSearchParams(window.location.search).get('courseId');
 const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
 // 获取练习题内容
 async function loadExercises(subCourseId) {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/api/get/sub-courses/${subCourseId}/exercises`);
+    const response = await fetch(`${config.API_BASE_URL}/api/courses/get/sub-courses/exercises/${subCourseId}`);
     const result = await response.json();
     exercisesTitle = result.title;
     exercises = result.exercises;
@@ -22,7 +23,7 @@ async function loadExercises(subCourseId) {
     }
     // 获取用户答题记录
     const type = 'exercise'
-    const responseUserAnswer = await fetch(`${config.API_BASE_URL}/api/user/get/${type}/${currentUser.id}/progress?subCourseId=${subCourseId}`,);
+    const responseUserAnswer = await fetch(`${config.API_BASE_URL}/api/user-progress/get/${type}/${currentUser.id}`,);
     const userAnswerData = await responseUserAnswer.json();
     userAnswers = userAnswerData.data
 
@@ -40,7 +41,8 @@ function showExercise(index) {
   const contentContainer = document.getElementById('practice-content');
 
   contentContainer.innerHTML = exercises.length > 0 ? `
-    <div class="box">
+    <div class="box" data-exercise-id="${exercise.id}">
+      <div class="admin-edit">编辑</div>
       <h2 class="title">${exercisesTitle}-练习题</h2>
       <div class="exercise-box">
         <p class="exercise-number">第 ${index + 1}/${exercises.length} 题</p>
@@ -127,8 +129,8 @@ async function saveExercise() {
     alert('请先作答')
     return
   }
-  const exercise = 'exercise'
-  const response = await fetch(`${config.API_BASE_URL}/api/user/upload/${exercise}/progress`, {
+  const type = 'exercise'
+  const response = await fetch(`${config.API_BASE_URL}/api/user-progress/upload/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -142,6 +144,13 @@ async function saveExercise() {
     alert('答题记录保存成功' + result.message)
   } else {
     alert('答题记录保存失败' + result.errorj)
+  }
+
+  if (userAnswers.length === exercises.length) {
+    updateSubCourseProgress();
+  }
+  else {
+    alert('未做完全部题目,不算完成本课题')
   }
 }
 
@@ -164,11 +173,37 @@ function restoreUserAnswers(correct_answer) {
   }
 }
 
+// 保存用户练习课程学习进度
+async function updateSubCourseProgress() {
+  try {
+    const response = await fetch(`${config.API_BASE_URL}/api/user-progress/course/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUser.id,
+        courseId: courseId,
+        subCourseId: subCourseId,
+        completed: true
+      })
+    });
+    const result = await response.json();
+    if (response.ok) {
+      alert('子课程进度更新成功');
+    } else {
+      alert('子课程进度更新失败' + result.error);
+    }
+  } catch (err) {
+    console.error('更新子课程进度失败:', err);
+  }
+}
+
+// 显示管理员上传练习题按钮
 function showUploadBtn() {
   const practiceContent = document.getElementById('practice-content')
   practiceContent.insertAdjacentHTML('beforeend', `
     <div class="upload-information" data-subcourse-id="${subCourseId}">添加练习题</div>
     `)
+
   practiceContent.addEventListener('click', (event) => {
     window.open(`../tob/c_uploadexercise.html?id=${subCourseId}`, '_blank');
   })
@@ -177,12 +212,25 @@ function showUploadBtn() {
 
 function bindEventListeners() {
   //管理员按钮功能
-  const uploadBox = document.getElementById('upload-practice-box')
+
   if (currentUser.admin) {
-    uploadBox.innerHTML = `
-  < div class= "upload-information" data - subcourse - id="${subCourseId}" > 添加练习题</div > `
-    uploadBox.addEventListener('click', (event) => {
-      window.open(`../ tob / c_uploadexercise.html ? id = ${subCourseId}`, '_blank');
+    // 管理员添加功能
+    const uploadDiv = document.getElementById('upload-practice-box')
+    uploadDiv.innerHTML = `
+      <div class= "upload-information" data-subcourse-id="${subCourseId}"> 添加练习题</div>`
+    uploadDiv.addEventListener('click', (event) => {
+      window.open(`../tob/c_uploadexercise.html?subCourseId=${subCourseId}`, '_blank');
+    });
+
+    // 管理员编辑功能
+    const editDiv = document.querySelector('.admin-edit')
+    editDiv.style.display = 'block'
+ 
+    const currentExercise = exercises[currentExerciseIndex]
+    const currentExerciseString=JSON.stringify(currentExercise)
+    editDiv.addEventListener('click', (event) => {
+      event.stopPropagation()
+      window.open(`../tob/c_uploadexercise.html?subCourseId=${subCourseId}&currentExerciseString=${currentExerciseString}`, '_blank');
     });
   }
 

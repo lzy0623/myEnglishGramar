@@ -23,7 +23,7 @@ async function loadDiscussionQuestions(questionType) {
 
     //获取用户的做题记录
     const type = 'community'
-    const correctResponse = await fetch(`${config.API_BASE_URL}/api/user/get/${type}/${userId}/progress`);
+    const correctResponse = await fetch(`${config.API_BASE_URL}/api/user-progress/get/${type}/${userId}`);
     const correctQuestionIds = await correctResponse.json();
     const correctQuestionIdsArray = correctQuestionIds.data.map(id => parseInt(id, 10));
     const filteredQuestions = questions.filter(question => !correctQuestionIdsArray.includes(question.id))
@@ -221,7 +221,7 @@ async function saveQuestionRecords() {
   }
   const userId = currentUser.id
   const type = 'community'
-  const response = await fetch(`${config.API_BASE_URL}/api/user/upload/${type}/progress`, {
+  const response = await fetch(`${config.API_BASE_URL}/api/user-progress/upload/${type}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

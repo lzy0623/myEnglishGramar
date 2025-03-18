@@ -101,10 +101,20 @@ body {
   width: 500px;
 }
 
+.form-group video {
+  width: 500px;
+  display: none;
+}
+
+
 input[name="correctAnswer"] {
   /* 样式规则 */
   width: 24px;
   margin-left: 30px;
+}
+
+input[type="radio"]{
+  accent-color: rgba(42, 130, 228, 1);
 }
 
 .form-actions {

@@ -26,7 +26,7 @@
           </div>
           <div class="form-group">
             <label for="features">知识点特点细述内容</label>
-            <textarea id="features" placeholder="输入知识点特点细述内容" rows="4" cols="60" oninput="autoResize(this)"></textarea>
+            <textarea id="features" placeholder="输入知识点特点细述内容" rows="4" cols="60"></textarea>
           </div>
           <div class="form-group">
             <label for="features-title">知识点特点细述标题</label>
@@ -50,6 +50,26 @@
     import { config } from '../../backend/config.js';
     // 解析传过来的子课程ID
     const subCourseId = new URLSearchParams(window.location.search).get('subCourseId');
+    const knowledgeId = new URLSearchParams(window.location.search).get('knowledgeId');
+    const knowledgeString = new URLSearchParams(window.location.search).get('knowledgeString');
+    const knowledge = JSON.parse(knowledgeString);
+
+    if (knowledge) {
+      document.getElementById('title').value = knowledge.title;
+      document.getElementById('example').value = knowledge.example;
+      document.getElementById('content').value = knowledge.content;
+      document.getElementById('features').value = knowledge.features.content.join('\n');
+      document.getElementById('features-title').value = knowledge.features.title;
+      document.getElementById('summary').value = knowledge.summary;
+
+      document.querySelectorAll('input').forEach(input => {
+        input.style.color = ' rgba(42, 130, 228, 1)'
+      });
+      document.querySelector('textarea').style.color = ' rgba(42, 130, 228, 1)'
+
+    }
+
+
     document.getElementById('submitSubCourseKnowledge').addEventListener('submit', async (e) => {
       e.preventDefault();
       const title = document.getElementById('title').value.trim();
@@ -74,33 +94,61 @@
         return;
       }
       try {
-        const response = await fetch(`${config.API_BASE_URL}/api/upload/sub-courses/${subCourseId}/knowledge`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            title: title,
-            example: example,
-            content: content,
-            features: featuresObj,
-            summary: summary
+        //更新知识点
+        if (knowledge) {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/update/sub-courses/knowledge/${subCourseId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              knowledgeId: knowledgeId,
+              title: title,
+              example: example,
+              content: content,
+              features: featuresObj,
+              summary: summary
+            })
           })
-        });
-        const result = await response.json();
-        if (response.ok) {
-          alert(`上传成功!知识点ID: ${result.id}`);
-        } else {
-          throw new Error(result.error || '上传失败');
+          const result = await response.json();
+          if (response.ok) {
+            alert(`更新成功!:${result.message}`);
+          } else {
+            throw new Error(result.error || '更新失败');
+          }
+
         }
+        //新增知识点
+        else {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/upload/sub-courses/knowledge/${subCourseId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              title: title,
+              example: example,
+              content: content,
+              features: featuresObj,
+              summary: summary
+            })
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(`上传成功!知识点ID: ${result.id}`);
+          } else {
+            throw new Error(result.error || '上传失败');
+          }
+        }
+
       } catch (err) {
         alert(`上传失败: ${err.message}`);
       }
     });
 
-
     // 自动调整高度
-    function autoResize(textarea) {
+    function autoResize() {
+      const textarea = document.getElementById('features')
       textarea.rows = 4;
       const textareaRows = textarea.scrollHeight / parseInt(window.getComputedStyle(textarea).lineHeight);
       if (textareaRows > 3) { textarea.rows = textareaRows }

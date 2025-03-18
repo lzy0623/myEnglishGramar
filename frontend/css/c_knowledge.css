@@ -4,6 +4,7 @@ body {
 
 /* 语法部分样式 */
 .grammar-section {
+  position: relative;
   margin: 0 auto;
   padding: 16px 24px;
   border: 1px solid #eee;
@@ -11,6 +12,17 @@ body {
   margin-bottom: 18px;
   width: 950px;
   transition: width 0.3s ease, height 0.3s ease, transform 0.3s ease;
+}
+
+.admin-edit {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(42, 130, 228, 1);
+  display: none;
 }
 
 .grammar-section:hover {

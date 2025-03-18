@@ -11,7 +11,7 @@
   <div class="main-container">
     <div class="content-wrapper">
       <div class="box">
-        <form onsubmit="submitSubCourseQuestion(event)">
+        <form id="submitSubCourseQuestion">
           <div class="form-group">
             <label for="question">问题</label>
             <input type="text" id="question" placeholder="输入或者粘贴问题" required>
@@ -50,10 +50,30 @@
     </div>
   </div>
 
-  <script>
-    const subCourseId = new URLSearchParams(window.location.search).get('id');
-    async function submitSubCourseQuestion(event) {
-      event.preventDefault();
+  <script type="module">
+    import { config } from '../../backend/config.js';
+
+    const subCourseId = new URLSearchParams(window.location.search).get('subCourseId');
+    const currentExerciseString = new URLSearchParams(window.location.search).get('currentExerciseString');
+    const currentExercise = JSON.parse(currentExerciseString);
+    console.log(currentExercise)
+
+    if (currentExercise) {
+      document.getElementById('question').value = currentExercise.question;
+      document.getElementById('optionA').value = currentExercise.options[0] || null;
+      document.getElementById('optionB').value = currentExercise.options[1] || null;
+      document.getElementById('optionC').value = currentExercise.options[2] || null;
+      document.getElementById('optionD').value = currentExercise.options[3] || null;
+      document.getElementById('analysis').value = currentExercise.analysis;
+      document.querySelector(`input[type='radio'][value='${currentExercise.correct_answer}']`).checked = true;
+      document.querySelectorAll('input').forEach(item => {
+        item.style.color = ' rgba(42, 130, 228, 1)'
+      });
+    }
+
+
+    document.getElementById('submitSubCourseQuestion').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const question = document.getElementById('question').value.trim();
       const optionA = document.getElementById('optionA').value.trim();
       const optionB = document.getElementById('optionB').value.trim();
@@ -71,23 +91,47 @@
       const options = [optionA, optionB, optionC, optionD].filter(option => option != '')
 
       try {
-        const respose = await fetch(`http://localhost:3000/api/upload/sub-course/${subCourseId}/exercise`, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ question, options, correctAnswer, analysis })
-        });
-        const result = await respose.json();
-        if (respose.ok) {
-          alert(`上传成功:${result.message}`);
-          document.querySelector('form').reset();
+        //更新现有题目
+        if (currentExercise) {
+          const exercisesId = currentExercise.id
+          console.log('练习id', exercisesId)
+          const respose = await fetch(`${config.API_BASE_URL}/api/courses/update/sub-courses/${subCourseId}/exercises`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ question, options, correctAnswer, analysis, exercisesId })
+          });
+          const result = await respose.json();
+          if (respose.ok) {
+            alert(`修改成功:${result.message}`);
+            document.querySelector('form').reset();
+          }
+          else {
+            alert(result.error || '修改题目失败')
+          }
         }
+        //新增题目
         else {
-          alert(result.error || '上传题目失败')
+          const respose = await fetch(`${config.API_BASE_URL}/api/courses/upload/sub-courses/exercises/${subCourseId}`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ question, options, correctAnswer, analysis })
+          });
+          const result = await respose.json();
+          if (respose.ok) {
+            alert(`上传成功:${result.message}`);
+            document.querySelector('form').reset();
+          }
+          else {
+            alert(result.error || '上传题目失败')
+          }
         }
+
       } catch (err) {
         alert('上传题目失败,可能网络问题')
       }
-    }
+    });
+
+
 
     //取消上传
     document.querySelector('.cancel-btn').addEventListener('click', () => {

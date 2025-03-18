@@ -22,8 +22,13 @@
           </div>
           <div class="form-group">
             <label for="video">主课程视频</label>
-            <input type="file" id="video" accept="video/*" required>
+            <input type="file" id="video" accept="video/*">
           </div>
+          <div class="form-group">
+            <label for="videoPreview"></label>
+            <video id="videoPreview" controls></video>
+          </div>
+
           <div class="form-actions">
             <button type="button" class="cancel-btn">取消上传</button>
             <button type="submit" class="submit-btn">上传</button>
@@ -36,39 +41,62 @@
 
   <script type="module">
     import { config } from '../../backend/config.js';
-    // 表单提交处理
-    document.getElementById('submitCourseForm').addEventListener('submit', async (e)=>{
+
+    const courseId = new URLSearchParams(window.location.search).get('courseId');
+    const courseTitle = new URLSearchParams(window.location.search).get('courseTitle');
+    const courseDescription = new URLSearchParams(window.location.search).get('courseDescription');
+    const courseVideoUrl = new URLSearchParams(window.location.search).get('courseVideoUrl');
+    
+    if (courseId) {
+      console.log('是编辑', courseId, courseTitle, courseDescription, courseVideoUrl)
+      document.getElementById('courseName').value = courseTitle;
+      document.getElementById('description').value = courseDescription;
+      document.getElementById('videoPreview').style.display = 'block';
+      document.getElementById('videoPreview').src = `${config.VIDEO_COURSE_PATH}${courseVideoUrl}`;
+    }
+
+    document.getElementById('submitCourseForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const courseName = document.getElementById('courseName').value.trim();
       const description = document.getElementById('description').value.trim();
-      const videoFile = document.getElementById('video').files[0];
-      if (!courseName || !description || !videoFile) {
+      const videoFile = document.getElementById('video').files[0] || null;
+      if (!courseName || !description) {
         alert('请填写所有必填项');
         return;
       }
-      //得到用户id方便确定用户是不是管理员
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      const userId = currentUser.id;
-      const userName = currentUser.username;
       // 构建表单数据
       const formData = new FormData();
       formData.append('title', courseName);
       formData.append('description', description);
       formData.append('video', videoFile);
-      formData.append('userId', userId);
-      formData.append('userName', userName);
-      try {
-        const response = await fetch(`${config.API_BASE_URL}/api/upload/course`, {
-          method: 'POST',
-          body: formData
-          // headers会自动设置multipart/form-data
-        });
 
-        const result = await response.json();
-        if (response.ok) {
-          alert(`上传成功!主课程ID: ${result.id}`);
-        } else {
-          throw new Error(result.error || '上传失败');
+      try {
+        // 编辑课程
+        if (courseId) {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/update/${courseId}`, {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(`更新成功${result.message}`);
+          } else {
+            throw new Error(result.error || '更新失败');
+          }
+        }
+        // 新增课程
+        else {
+          const response = await fetch(`${config.API_BASE_URL}/api/courses/upload`, {
+            // headers会自动设置multipart/form-data
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
+          if (response.ok) {
+            alert(`上传成功!主课程ID: ${result.id}`);
+          } else {
+            throw new Error(result.error || '上传失败');
+          }
         }
       } catch (err) {
         console.error('上传错误:', err);
@@ -80,6 +108,16 @@
     document.querySelector('.cancel-btn').addEventListener('click', () => {
       document.querySelector('form').reset();
       window.close();
+    });
+    // 视频预览功能
+    document.getElementById('video').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const videoPreview = document.getElementById('videoPreview');
+        videoPreview.src = URL.createObjectURL(file);
+        videoPreview.style.display = 'block';
+        videoPreview.load();
+      }
     });
   </script>
 </body>

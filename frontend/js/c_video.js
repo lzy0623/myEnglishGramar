@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     try {
-      const response = await fetch(`${config.API_BASE_URL}/api/course/video/upload/comment`, {
+      const response = await fetch(`${config.API_BASE_URL}/api/courses/video/upload/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   async function loadComments() {
     try {
-      const response = await fetch(`${config.API_BASE_URL}/api/course/video/get/comment`, {
+      const response = await fetch(`${config.API_BASE_URL}/api/courses/video/get/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courseId: courseData.courseId })

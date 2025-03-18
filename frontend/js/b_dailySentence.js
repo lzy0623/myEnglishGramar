@@ -6,7 +6,7 @@ async function loadDailySentence(selectDate) {
     selectDate = new Date().toISOString().split('T')[0];
   }
   try {
-    const response = await fetch(`${config.API_BASE_URL}/api/get/${selectDate}/sentence`);
+    const response = await fetch(`${config.API_BASE_URL}/api/sentence/get/${selectDate}`);
     const result = await response.json();
     if (response.ok) {
       // 更新日期
@@ -21,6 +21,7 @@ async function loadDailySentence(selectDate) {
       document.querySelector('.datemoon strong').textContent = month;
     } else {
       document.querySelector('.english').textContent = result.error;
+      document.querySelector('.translation').textContent = ''
     }
   } catch (err) {
     console.error('前端请求错误:', err);
@@ -64,18 +65,27 @@ document.addEventListener('DOMContentLoaded', function () {
   // 显示或者隐藏翻译
   document.getElementById('translateToggle').addEventListener('click', function () {
     const translationContent = document.querySelector('.translation');
+    const actionsBox = document.querySelector('.actions')
     translationContent.classList.toggle('hidden');
     translationContent.classList.toggle('show');
+    actionsBox.style.marginTop = translationContent.classList.contains('show') ? '0px' : '20px';
+
+    setTimeout(() => {
+
+    }, 100);
+
+
+
   });
 
-    // 判断用户是否为管理员,显示管理按钮
-    if (getCurrentUser().admin) {
-      document.getElementById('upload-information-box').innerHTML = `
+  // 判断用户是否为管理员,显示管理按钮
+  if (getCurrentUser().admin) {
+    document.getElementById('upload-information-box').innerHTML = `
       <div class="upload-information" id="uploadSentence">添加每日一句</div>`;
-      document.getElementById('uploadSentence').addEventListener('click', () => {
-        window.open('../tob/b_uploadsentence.html', '_blank');
-      });
-    }
+    document.getElementById('uploadSentence').addEventListener('click', () => {
+      window.open('../tob/b_uploadsentence.html', '_blank');
+    });
+  }
 });
 
 

@@ -3,12 +3,13 @@ import { config } from '../../backend/config.js';
 // 获取主课程
 async function loadCourses() {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/api/get/courses`);
+    const response = await fetch(`${config.API_BASE_URL}/api/courses/get`);
     const courses = await response.json();
     const contentContainer = document.getElementById('content-wrapper');
 
     contentContainer.innerHTML = courses.map(course => `
-      <div class="grammar-card">
+      <div class="grammar-card" data-course-id="${course.id}">
+        <div class="admin-edit" data-action="course-edit">编辑</div>
         <div class="card-header" data-course-id="${course.id}">
           <div class="icon-map">
             <img src="../icon/course_cap.png">
@@ -26,6 +27,9 @@ async function loadCourses() {
     if (getCurrentUser().admin) {
       document.getElementById('upload-course-box').innerHTML = `
       <div class="upload-information" data-action="uploadCourse">添加主课程</div>`;
+      document.querySelectorAll('.admin-edit').forEach(item => {
+        item.style.display = 'block';
+      })
     }
 
     // 绑定事件监听器
@@ -38,13 +42,14 @@ async function loadCourses() {
 // 获取子课程
 async function loadSubCourses(courseId) {
   try {
-    const response = await fetch(`${config.API_BASE_URL}/api/get/courses/${courseId}/sub-courses`);
+    const response = await fetch(`${config.API_BASE_URL}/api/courses/get/sub-courses/${courseId}`);
     const subCourses = await response.json();
     const subCoursesContainer = document.getElementById(`sub-courses-${courseId}`);
 
     subCoursesContainer.innerHTML = subCourses.map(subCourse => `
       <div class="sub-cards">
-        <div class="sub-card">
+        <div class="sub-card" data-sub-course-id="${subCourse.id}" data-course-id="${courseId}">
+          <div class="admin-edit" data-action="sub-course-edit">编辑</div>
           <div class="icon-label">
             <img src="../icon/course_label.png" />
           </div>
@@ -53,8 +58,8 @@ async function loadSubCourses(courseId) {
             <p>${subCourse.description}</p>
           </div>
           <div class="sub-card-actions">
-            <button class="detail-btn" data-action="loadKnowledgePoints" data-sub-course-id="${subCourse.id}">知识点详解</button>
-            <button class="practice-btn" data-action="loadExercises" data-sub-course-id="${subCourse.id}">题目练习</button>
+            <button class="detail-btn" data-action="loadKnowledgePoints" data-sub-course-id="${subCourse.id}" data-course-id="${courseId}">知识点详解</button>
+            <button class="practice-btn" data-action="loadExercises" data-sub-course-id="${subCourse.id}" data-course-id="${courseId}">题目练习</button>
           </div>
         </div>
       </div>`).join('') + `<div id="upload-box-${courseId}"></div>`;
@@ -62,12 +67,15 @@ async function loadSubCourses(courseId) {
     if (getCurrentUser().admin) {
       document.getElementById(`upload-box-${courseId}`).innerHTML = `
       <div class="upload-information" data-action="uploadSubCourse" data-course-id="${courseId}">添加子课程</div>`;
+      document.querySelectorAll('.admin-edit').forEach(item => {
+        item.style.display = 'block';
+      })
     }
   } catch (err) {
     alert('加载子课程失败:', err);
   }
+  loadUserProgress()
 }
-
 
 // 绑定事件监听器
 function bindEventListeners() {
@@ -89,7 +97,7 @@ function bindEventListeners() {
       const courseDAtaString = JSON.stringify(courseDada);
       window.open(`c_video.html?courseDAtaString=${courseDAtaString}`, '_blank');
       event.stopPropagation();
-      return; 
+      return;
     }
     //切换显示子课程
     if (target.closest('.card-header')) {
@@ -101,10 +109,9 @@ function bindEventListeners() {
     // 跳转到知识点页面
     if (target.closest('.detail-btn')) {
       const subCourseId = target.closest('.detail-btn').getAttribute('data-sub-course-id');
-      console.log('subCourseId:', subCourseId, typeof subCourseId)
-      if (subCourseId == 1||getCurrentUser().vip) {
+      if (subCourseId == 1 || getCurrentUser().vip) {
         window.open(`c_knowledge.html?subCourseId=${subCourseId}`, '_blank')
-      } 
+      }
       else {
         openVipModal();
       }
@@ -114,9 +121,11 @@ function bindEventListeners() {
     // 跳转到练习题页面
     if (target.closest('.practice-btn')) {
       const subCourseId = target.closest('.practice-btn').getAttribute('data-sub-course-id');
-      if (subCourseId == 1||getCurrentUser().vip) {
-        window.open(`c_practice.html?subCourseId=${subCourseId}`, '_blank')
-      } 
+      const courseId = target.closest('.practice-btn').getAttribute('data-course-id');
+      console.log('subCourseId:', subCourseId, 'courseId:', courseId,)
+      if (subCourseId == 1 || getCurrentUser().vip) {
+        window.open(`c_practice.html?subCourseId=${subCourseId}&courseId=${courseId}`, '_blank')
+      }
       else {
         openVipModal();
       }
@@ -133,6 +142,35 @@ function bindEventListeners() {
     if (target.closest('.upload-information[data-action="uploadSubCourse"]')) {
       const courseId = target.closest('.upload-information').getAttribute('data-course-id');
       window.open(`../tob/c_uploadsubcourse.html?courseId=${courseId}`, '_blank');
+      event.stopPropagation();
+    }
+
+    //编辑主课程
+    if (target.closest('.admin-edit[data-action="course-edit"]')) {
+      const editEl = target.closest('.admin-edit[data-action="course-edit"]')
+      const grammarBox = editEl.closest('.grammar-card')
+
+      const courseId = grammarBox.getAttribute('data-course-id')
+      const courseTitle = grammarBox.querySelector('h2').textContent
+      const courseDescription = grammarBox.querySelector('p').textContent
+      const courseVideoUrl = grammarBox.querySelector('.video-btn').getAttribute('data-video-url')
+
+      window.open(`../tob/c_uploadcourse.html?courseId=${courseId}&courseTitle=${courseTitle}&courseDescription=${courseDescription}&courseVideoUrl=${courseVideoUrl}`, '_blank');
+
+      event.stopPropagation();
+    }
+
+    // 编辑子课程
+    if (target.closest('.admin-edit[data-action="sub-course-edit"]')) {
+      const editEl = target.closest('.admin-edit[data-action="sub-course-edit"]')
+      const subCardBox = editEl.closest('.sub-card')
+
+      const courseId = subCardBox.getAttribute('data-course-id');
+      const subCourseId = subCardBox.getAttribute('data-sub-course-id')
+      const subCourseTitle = subCardBox.querySelector('h3').textContent
+      const subCourseDescription = subCardBox.querySelector('p').textContent
+
+      window.open(`../tob/c_uploadsubcourse.html?courseId=${courseId}&subCourseId=${subCourseId}&subCourseTitle=${subCourseTitle}&subCourseDescription=${subCourseDescription}`, '_blank');
       event.stopPropagation();
     }
 
@@ -187,6 +225,25 @@ function toggleSubCourses(courseId) {
       });
       container.classList.add('hidden');
     }, { once: true });
+  }
+}
+
+// 加载用户对课程的学习进度
+async function loadUserProgress() {
+  try {
+    const userId = getCurrentUser().id;
+    const response = await fetch(`${config.API_BASE_URL}/api/user-progress/course/get/${userId}`);
+    const progress = await response.json();
+    progress.forEach(item => {
+      const subCourseElement = document.querySelector(`.sub-card[data-sub-course-id="${item.sub_course_id}"]`);
+      if (subCourseElement) {
+        if (item.completed) {
+          subCourseElement.classList.add('completed');
+        }
+      }
+    });
+  } catch (err) {
+    console.error('加载用户进度失败:', err);
   }
 }
 

@@ -50,7 +50,7 @@
   </div>
 
   <script type="module">
-    import {config} from '../../backend/config.js';
+    import { config } from '../../backend/config.js';
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData();
@@ -60,7 +60,7 @@
       formData.append('image', document.getElementById('image').files[0]);
 
       try {
-        const response = await fetch(`${config.API_BASE_URL}/api/upload/sentence`, {
+        const response = await fetch(`${config.API_BASE_URL}/api/sentence/upload`, {
           method: 'POST',
           body: formData
         });

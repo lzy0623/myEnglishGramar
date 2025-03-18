@@ -18,13 +18,29 @@
 }
 
 .user-info .user-details h2 {
-  cursor: pointer;
   font-size: 22px;
   font-weight: 550;
   letter-spacing: 2px;
   margin-bottom: 10px;
   color: rgba(56, 56, 56, 1);
   text-align: left;
+}
+
+.user-info .user-details h4 {
+  color: rgb(128, 128, 128);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-align: top;
+  margin-left: 6px;
+  margin-bottom: 8px;
+}
+
+.user-info .user-details .nickname {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .user-info .user-details .img-vip {
@@ -205,9 +221,3 @@ input[type="text"] {
 .close:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
-
-
-
-
-
-

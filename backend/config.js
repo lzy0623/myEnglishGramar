@@ -10,7 +10,8 @@ export const dbConfig = {
   user: 'root',      // 数据库用户名
   password: '123456',      // 数据库密码
   database: 'english_grammar_system', // 数据库名称
-  port: 3306,        // 数据库端口，默认是 3306
+  waitForConnections: true,//是否等待连接，可不更改
+  connectionLimit: 10//连接池最大连接数，可不更改
 };
 
 export const uploadResourcesConfig = {// 静态资源路径,图片视频等路径配置

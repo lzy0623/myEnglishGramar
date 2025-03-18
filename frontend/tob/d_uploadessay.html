@@ -11,7 +11,7 @@
   <div class="main-container">
     <div class="content-wrapper">
       <div class="box">
-        <form onsubmit="submitEssay(event)">
+        <form id="submitEssay">
           <div class="form-group">
             <label for="title">短文标题</label>
             <input type="text" id="title" placeholder="输入知识点标题(必填项)" required>
@@ -34,14 +34,13 @@
 
           <div id="article-container">
             <div class="form-group">
-              <label for="english1">段落1</label>
-              <textarea id="english1" placeholder="输入段落1内容" rows="3" cols="60"
-                oninput="autoResize(this);checkAndAddNewSection(this)" required></textarea>
+              <label for="english">英文短文</label>
+              <textarea id="english" placeholder="在此输入短文,请保持段落之间空行" rows="3" cols="80" required></textarea>
             </div>
+
             <div class="form-group">
-              <label for="translate1">段落1翻译</label>
-              <textarea id="translate1" placeholder="输入段落1翻译内容" rows="3" cols="60"
-                oninput="autoResize(this);checkAndAddNewSection(this)" required></textarea>
+              <label for="translate">短文翻译</label>
+              <textarea id="translate" placeholder="在此输入短文翻译,请保持段落之间空行" rows="3" cols="80" required></textarea>
             </div>
           </div>
 
@@ -55,31 +54,41 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { config } from '../../backend/config.js';
     // 提交短文,与后端通信
-    async function submitEssay(event) {
-      event.preventDefault();
-      const articleContainer = document.getElementById('article-container');
-      const sections = articleContainer.querySelectorAll('.form-group textarea');
-      const content = [];
-      for (let i = 0; i < sections.length; i += 2) {
-        const english = sections[i].value.trim();
-        const translate = sections[i + 1].value.trim();
-        if (english && translate) {
-          content.push({
-            english, translate
-          });
-        }
-      }
+    document.getElementById('submitEssay').addEventListener('submit', async (e) => {
+      e.preventDefault();
       const title = document.getElementById('title').value.trim();
       const difficulty = document.getElementById('difficulty').value.trim();
       const date = document.getElementById('date').value.trim();
-      if (!title || !difficulty || !date || content.length === 0) {
+
+      const englishText = document.getElementById('english').value.trim();
+      const translateText = document.getElementById('translate').value.trim();
+
+      if (!title || !difficulty || !date || !englishText || !translateText) {
         alert('请填写所有必填项');
       }
 
+      const englishParagraphs = englishText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+      const translateParagraphs = translateText.split(/\n\s*\n/).map(p => p.trim()).filter(p => p.length > 0);
+
+      if (englishParagraphs.length !== translateParagraphs.length) {
+        alert('英文段落和翻译段落数量不匹配，请检查后重试');
+        return;
+      }
+
+      const content = englishParagraphs.map((english, index) => ({
+        english,
+        translate: translateParagraphs[index]
+      }));
+
+      console.log('拼接好后', content, typeof content);
+      console.log('拼接', englishParagraphs, translateParagraphs);
+
+
       try {
-        const response = await fetch('http://localhost:3000/api/upload/article', {
+        const response = await fetch(`${config.API_BASE_URL}/api/articles/upload`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -94,19 +103,7 @@
         const result = await response.json();
         if (response.ok) {
           alert('上传成功' + result.message);
-          // 重置表单和文本域
           document.querySelector('form').reset();
-          document.getElementById('article-container').innerHTML = `
-          <div class="form-group">
-            <label for="english1">段落1</label>
-            <textarea id="english1" placeholder="输入段落1内容" rows="3" cols="60"
-              oninput="autoResize(this);checkAndAddNewSection(this)" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="translate1">段落1翻译</label>
-            <textarea id="translate1" placeholder="输入段落1翻译内容" rows="3" cols="60"
-              oninput="autoResize(this);checkAndAddNewSection(this)" required></textarea>
-          </div>`;
         }
         else {
           alert(`上传失败: ${result.error}`);
@@ -114,7 +111,8 @@
       } catch (error) {
         alert(`上传失败: ${error.message}`);
       }
-    }
+
+    });
 
     // 取消上传
     document.querySelector('.cancel-btn').addEventListener('click', () => {
@@ -138,39 +136,15 @@
       selectElement.appendChild(option);
     }
 
-    // 自动调整textarea高度
-    function autoResize(textarea) {
-      textarea.rows = 3;
-      const textareaRows = textarea.scrollHeight / parseInt(window.getComputedStyle(textarea).lineHeight);
-      if (textareaRows > 3) { textarea.rows = textareaRows }
-    }
+    // 自动调整文本域高度
+    document.querySelectorAll('.form-group textarea').forEach(textarea => {
+      textarea.addEventListener('input', () => {
+        textarea.rows = 3;
+        const textareaRows = textarea.scrollHeight / parseInt(window.getComputedStyle(textarea).lineHeight);
+        if (textareaRows > 3) { textarea.rows = textareaRows }
+      });
+    });
 
-    // 检查所有textarea是否填写完毕，如果全部填写完毕，则添加新的section
-    function checkAndAddNewSection(textarea) {
-      const articleContainer = document.getElementById('article-container');
-      const sections = articleContainer.querySelectorAll('.form-group textarea');
-      let allFilled = true;
-      sections.forEach(section => {
-        if (section.value.trim() === '') {
-          allFilled = false;
-        }
-      })
-      if (allFilled) {
-        const newSectionIndex = sections.length / 2 + 1;
-        const newSection = `
-             <div class="form-group">
-              <label for="english${newSectionIndex}">段落${newSectionIndex}</label>
-              <textarea id="english${newSectionIndex}" placeholder="输入段落${newSectionIndex}内容" rows="3" cols="60"
-                oninput="autoResize(this);checkAndAddNewSection(this)"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="translate${newSectionIndex}">段落1翻译</label>
-              <textarea id="translate${newSectionIndex}" placeholder="输入段落${newSectionIndex}翻译内容" rows="3" cols="60"
-                oninput="autoResize(this);checkAndAddNewSection(this)"></textarea>
-            </div>`;
-        articleContainer.insertAdjacentHTML('beforeend', newSection);
-      }
-    }
   </script>
 </body>
 
