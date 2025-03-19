@@ -75,7 +75,7 @@ router.get('/get/:userId/:type/discussion-data', async (req, res) => {
           [userId]
         );
         return res.json(likedQuestions);
-        
+
       // 获取用户评论的题目
       case 'commentedQuestions':
         const [commentedQuestions] = await pool.query(`
@@ -138,6 +138,8 @@ router.post('/update-info', avatarUpload.single('avatar'), async (req, res) => {
 
     // 获取旧的头像路径
     const oldImagePath = user[0].avatar;
+    console.log('旧', oldImagePath, typeof oldImagePath)
+    console.log('新', imagePath, typeof imagePath)
 
     // 更新头像逻辑
     if (imagePath) {
@@ -146,15 +148,15 @@ router.post('/update-info', avatarUpload.single('avatar'), async (req, res) => {
       if (fs.existsSync(oldImagePathFull)) {
         fs.unlinkSync(oldImagePathFull);
       }
-    } else {
-      imagePath = oldImagePath;
     }
 
-    // 更新数据库
-    await pool.query(
-      'UPDATE users SET nickname = ?, avatar = ? WHERE id = ?',
-      [nickname, imagePath, userId]
-    );
+    const queryUpdate = imagePath ? `UPDATE users SET nickname = ?, avatar = ? WHERE id = ?` : `UPDATE users SET nickname = ? WHERE id = ?`;
+    const queryValues = imagePath ? [nickname, imagePath, userId] : [nickname, userId];
+
+    console.log('操作', queryUpdate)
+    console.log('数据', queryValues)
+
+    const [result] = await pool.query(queryUpdate, queryValues);
     res.json({ message: '更新成功' });
   } catch (err) {
     res.status(500).json({ error: '服务器错误', details: err.message });
